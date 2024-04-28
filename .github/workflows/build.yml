@@ -1,14 +1,25 @@
-name: learn-action
+name: build
 run-name: ${{ github.actor }} is learning actions
 on: [push]
+
+permissions:
+    contents: write
+
 jobs:
-    check-bats-version:
+    build-extension:
         runs-on: ubuntu-latest
         steps: 
-            - uses: actions/checkout@v4
-            - uses: actions/setup-node@v4
+            - name: 读取仓库
+              uses: actions/checkout@v4
+
+            - name: 打包
+              run: | 
+                npm install
+                npm run build
+
+            - name: 部署
+              uses: JamesIves/github-pages-deploy-action@4.1.4
               with: 
-                node-version: '20'
-            - run: npm install -g bats
-            - run: bats -v
-       
+                branch: gh-pages
+                folder: build
+
