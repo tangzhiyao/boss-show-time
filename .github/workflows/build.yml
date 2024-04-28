@@ -1,0 +1,30 @@
+name: build
+run-name: ${{ github.actor }} is learning actions
+on: 
+    push:
+        branches:
+            - main
+        tags:
+            - build-**
+
+permissions:
+    contents: write
+
+jobs:
+    build-extension:
+        runs-on: ubuntu-latest
+        steps: 
+            - name: 读取仓库
+              uses: actions/checkout@v4
+
+            - name: 打包
+              run: | 
+                npm install
+                npm run build
+
+            - name: 部署
+              uses: JamesIves/github-pages-deploy-action@4.1.4
+              with: 
+                branch: gh-pages
+                folder: build
+
