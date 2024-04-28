@@ -1,6 +1,11 @@
 name: build
 run-name: ${{ github.actor }} is learning actions
-on: [push]
+on: 
+    push:
+        branches:
+            - main
+        tags:
+            - build-**
 
 permissions:
     contents: write
