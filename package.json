@@ -1,6 +1,6 @@
 {
   "name": "boss-show-time",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "展示 boss 直聘岗位的时间",
   "private": true,
   "scripts": {
