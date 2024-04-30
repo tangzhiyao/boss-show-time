@@ -4,6 +4,19 @@
     top: 0;
     background: rgba(229, 248, 248);
     color: #00a6a7;
-    padding: 0 4px;
+    padding: 0 8px;
+    font-size: 14px;
     border-radius: 0 0 0 4px;
 }
+
+.__zhipin_time_tag {
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: #426eff;
+    color: white;
+    padding: 0 8px;
+    font-size: 14px;
+    border-radius: 0 0 0 4px;
+}
+

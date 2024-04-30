@@ -78,3 +78,4 @@
         window.dispatchEvent(event);
     }
   });
+  

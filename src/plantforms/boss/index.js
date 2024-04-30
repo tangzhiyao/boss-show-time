@@ -61,6 +61,7 @@ function parseBossData(list, getListItem) {
         const time = dayjs(lastModifyTime).format('YYYY-MM-DD HH:mm:ss');
         const dom = getListItem(itemId);
         let tag = createDOM(time); 
+        console.log('tzy dom', item, dom)
         dom.appendChild(tag);
     });
 }

@@ -1,7 +1,6 @@
 {
     "manifest_version": 3,
     "name": "Boss Show-time",
-    "$schema": "https://json.schemastore.org/chrome-manifest.json",
     "version": "0.1.0",
     "description": "My Chrome Extension",
     "icons": {
@@ -12,20 +11,31 @@
     },
     "content_scripts": [
         {
-            "js": ["app.js", "proxyAjax.js"],
+            "js": ["app.js"],
             "matches": [
-                "https://www.zhipin.com/*"
+                "https://www.zhipin.com/*",
+                "https://sou.zhaopin.com/*"
             ]
         }
     ],
     "web_accessible_resources": [
         {
             "resources": ["proxyAjax.js", "app.css"],
-            "matches": ["https://www.zhipin.com/*"]
+            "matches": [
+                "https://www.zhipin.com/*", 
+                "https://sou.zhaopin.com/*"
+            ]
+        },
+        {
+            "resources": ["zhilianFirstOpen.js"],
+            "matches": [
+                "https://sou.zhaopin.com/*"
+            ]
         }
     ],
     "permissions": [
         "webRequest",
-        "https://www.zhipin.com/*"
+        "https://www.zhipin.com/*",
+        "https://sou.zhaopin.com/*"
     ]
 }
