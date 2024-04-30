@@ -1,0 +1,2 @@
+(()=>{"use strict";!function(){const t=document.querySelector(".positionlist")?.children,{positionList:i=[]}=window.__INITIAL_STATE__;t&&i&&0!==i.lenth&&i.forEach(((i,n)=>{const{firstPublishTime:e}=i,o=t?.[n];if(!o)return;let s=function(t){const i=document.createElement("div");return i.classList.add("__zhipin_time_tag"),i.innerText=t,i}(`发布时间：${e}`);o.appendChild(s)}))}()})();
+//# sourceMappingURL=zhilianFirstOpen.js.map
