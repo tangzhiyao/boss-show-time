@@ -20,3 +20,13 @@
     border-radius: 0 0 0 4px;
 }
 
+/* 与BOSS直聘的筛选器样式 .condition-filter-select .current-select 保持一致*/
+.__boss_filter.condition-filter-select .current-select::after {
+    content: unset;
+}
+.__boss_filter.condition-filter-select .current-select {
+    padding-right: 12px;
+}
+.__boss_filter_result-hidden {
+    display: none;
+}

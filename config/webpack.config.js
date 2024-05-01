@@ -12,6 +12,7 @@ const config = merge(common, {
     // background: PATHS.src + '/background.js',
     proxyAjax: PATHS.src + '/proxyAjax.js',
     zhilianFirstOpen: PATHS.src + '/plantforms/zhilian/firstOpen.js',
+    bossFirstOpen: PATHS.src + '/plantforms/boss/firstOpen.js',
   },
 });
 

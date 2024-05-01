@@ -31,6 +31,12 @@
             "matches": [
                 "https://sou.zhaopin.com/*"
             ]
+        },
+        {
+            "resources": ["bossFirstOpen.js"],
+            "matches": [
+                "https://www.zhipin.com/*"
+            ]
         }
     ],
     "permissions": [

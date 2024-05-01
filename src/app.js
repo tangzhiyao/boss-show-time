@@ -14,6 +14,12 @@ import { createLink, createScript } from './utils.js';
     
     head.appendChild(link);
     head.appendChild(zhilianFirstScript);
+    
+    if (location.host === 'www.zhipin.com') {
+        const bossFirstScript = createScript(chrome.runtime.getURL("./bossFirstOpen.js"))
+        head.appendChild(bossFirstScript);
+    }
+
     if(head.firstChild) {
         // proxyScript 要保证在第一个插入
         head.insertBefore(proxyScript, head.firstChild);
