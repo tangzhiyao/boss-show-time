@@ -31,16 +31,12 @@
             "matches": [
                 "https://sou.zhaopin.com/*"
             ]
-        },
-        {
-            "resources": ["bossFirstOpen.js"],
-            "matches": [
-                "https://www.zhipin.com/*"
-            ]
         }
     ],
     "permissions": [
-        "webRequest",
+        "webRequest"
+    ],
+    "host_permissions": [
         "https://www.zhipin.com/*",
         "https://sou.zhaopin.com/*"
     ]

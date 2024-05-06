@@ -1,11 +1,12 @@
-import dayjs from 'dayjs';;
+import dayjs from 'dayjs';
+import onlineFilter from './onlineFilter';
 
 export function getBossData(responseText) {
     try {
         const data = JSON.parse(responseText);
         mutationContainer().then((node) => {
             parseBossData(data?.zpData?.jobList || [], getListByNode(node));
-            handleBossOnlineFilter(data?.zpData?.jobList || []);
+            onlineFilter();
         })
         return 
     } catch(err) {
@@ -62,7 +63,6 @@ function parseBossData(list, getListItem) {
         const time = dayjs(lastModifyTime).format('YYYY-MM-DD HH:mm:ss');
         const dom = getListItem(itemId);
         let tag = createDOM(time); 
-        console.log('tzy dom', item, dom)
         dom.appendChild(tag);
     });
 }
@@ -72,23 +72,4 @@ function createDOM(time) {
     div.classList.add('__boss_time_tag');
     div.innerText = time;
     return div;
-}
-
-/**
- * 当ajax请求返回数据，派发自定义事件，将招聘人不在线的job id传递给自定义filter——"招聘人在线"的事件监听器
- * @param {Array} results - 最新职位列表数据
- */
-function handleBossOnlineFilter(results) {
-    let tmpArr = [];
-    results.forEach((r) => {
-        if (!r.bossOnline) {
-            tmpArr.push(r.itemId);
-        }
-    });
-
-    window.dispatchEvent(new CustomEvent('job-list-change', {
-        detail: {
-            bossOfflineJobIds: tmpArr
-        }
-    }));
 }

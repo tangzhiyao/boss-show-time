@@ -4,8 +4,6 @@ function _console() {
     } else return;
 }
 
-let bossOfflineJobIds = [];
-
 // 创建filter过滤招聘人在线的job
 function createFilter() {
     _console('2. bfEle 不存在，执行添加');
@@ -21,26 +19,22 @@ function createFilter() {
         e.stopPropagation();
 
         let filterEle = e.currentTarget;
-        let tmpEle;
-        _console('5. click事件响应', bossOfflineJobIds);
-
-        try {
-            if (filterEle.classList.contains('is-select')) {
-                bossOfflineJobIds.forEach(index => {
-                    tmpEle = document.querySelector(`.job-card-wrapper[ka=search_list_${index}]`);
-                    tmpEle.classList.remove('__boss_filter_result-hidden');
-                });
-                filterEle.classList.remove('is-select');
-            } else {
-                bossOfflineJobIds.forEach(index => {
-                    tmpEle = document.querySelector(`.job-card-wrapper[ka=search_list_${index}]`);
-                    tmpEle.classList.add('__boss_filter_result-hidden');
-                });
-                filterEle.classList.add('is-select');
-            }
-        } catch (error) {
-            _console('筛选出错', error);
+        const isSelected = filterEle.classList.contains('is-select');
+        if(isSelected) {
+            filterEle.classList.remove('is-select');
+        } else {
+            filterEle.classList.add('is-select');
         }
+        Array.from(document.querySelectorAll('.search-job-result .job-card-wrapper')).map(node => {
+           const isOnline = node.getElementsByClassName('boss-online-tag').length !== 0;
+           console.log('isonline', isOnline)
+            if(isSelected) {
+                node.classList.remove('__boss_filter_result-hidden');
+            } else {
+                !isOnline && node.classList.add('__boss_filter_result-hidden');
+            }
+        });
+
     });
 
     // 插入到父元素 .search-condition-wrapper 最后一个元素之前
@@ -55,6 +49,8 @@ function createFilter() {
 }
 
 function main() {
+
+
     const bfEle = document.querySelector('.__boss_filter.condition-filter-select');
     if (bfEle) {
         _console('1. bfEle 已经存在');
@@ -70,19 +66,6 @@ function main() {
     }
 }
 
-_console('0.1 load firstOpen.js');
-// 页面加载完成后执行
-if (document.readyState === 'complete') {
-    _console('0.2 页面readyState为complete');
-    main();
-} else {
-    _console('0.3 页面readyState不为complete');
-    window.addEventListener('load', main);
-}
 
-// 监听job-list-change事件，更新bossOfflineJobIds
-window.addEventListener('job-list-change', (e) => {
-    main();
-    bossOfflineJobIds = e.detail.bossOfflineJobIds;
-    _console('4. 自定义job-list-change回调', bossOfflineJobIds);
-});
+export default main;
+
