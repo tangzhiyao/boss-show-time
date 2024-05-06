@@ -1,4 +1,4 @@
-.__boss_time_tag {
+.__boss_time_tag, .__zhipin_time_tag {
     position: absolute;
     right: 0;
     top: 0;
@@ -8,7 +8,7 @@
     font-size: 14px;
     border-radius: 0 0 0 4px;
 }
-
+/* 
 .__zhipin_time_tag {
     position: absolute;
     right: 0;
@@ -18,7 +18,7 @@
     padding: 0 8px;
     font-size: 14px;
     border-radius: 0 0 0 4px;
-}
+} */
 
 /* 与BOSS直聘的筛选器样式 .condition-filter-select .current-select 保持一致*/
 .__boss_filter.condition-filter-select .current-select::after {
@@ -29,4 +29,14 @@
 }
 .__boss_filter_result-hidden {
     display: none;
+}
+
+.__is_outsourcing_or_training {
+    color:red;
+    font-size:12px;
+    background-color: yellow;
+}
+
+.__rencent_update {
+    color: red;
 }

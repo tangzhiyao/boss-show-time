@@ -27,7 +27,6 @@ function createFilter() {
         }
         Array.from(document.querySelectorAll('.search-job-result .job-card-wrapper')).map(node => {
            const isOnline = node.getElementsByClassName('boss-online-tag').length !== 0;
-           console.log('isonline', isOnline)
             if(isSelected) {
                 node.classList.remove('__boss_filter_result-hidden');
             } else {

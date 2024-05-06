@@ -1,3 +1,7 @@
+import { isOutsource } from "../../data/outsource"
+import { isTraining } from "../../data/training";
+import { convertTimeToHumanReadable } from "../../utils"
+import dayjs from "dayjs";
 
 export function getZhiLianData(responseText) {
     try {
@@ -5,7 +9,6 @@ export function getZhiLianData(responseText) {
         mutationContainer().then((node) => {
             parseZhiPinData(data?.data?.list || [], getListByNode(node));
         })
-        return 
     } catch(err) {
         console.error('解析 JSON 失败', err);
     }
@@ -43,16 +46,32 @@ function parseZhiPinData(list, getListItem) {
     list.forEach((item, index) => {
         const {
             firstPublishTime,
+            companyName,
         }  = item;
         const dom = getListItem(index);
-        let tag = createDOM(`发布时间：${firstPublishTime}`); 
+        let tag = createDOM(firstPublishTime, companyName); 
         dom.appendChild(tag);
     });
 }
 
-export function createDOM(time) {
+export function createDOM(time, companyName) {
     const div = document.createElement('div');
     div.classList.add('__zhipin_time_tag');
-    div.innerText = time;
+
+    const isOutsourceBrand = isOutsource(companyName);
+    const isTrainingBrand = isTraining(companyName);
+    const timeHumanReadable = convertTimeToHumanReadable(time);
+    let text = dayjs(time).format('YYYY-MM-DD') +  (timeHumanReadable && "【"+timeHumanReadable+"更新】");
+    
+    if(isOutsourceBrand){
+        text += "【疑似外包公司】";
+        div.classList.add('__is_outsourcing_or_training');
+    }
+    if(isTrainingBrand){
+        text += "【疑似培训机构】";
+        div.classList.add('__is_outsourcing_or_training');
+    }
+
+    div.innerHTML = text;
     return div;
 }

@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "ajax-hooks": "^1.8.0",
-    "dayjs": "^1.11.10"
+    "dayjs": "^1.11.10",
+    "jquery": "^3.7.1"
   }
 }

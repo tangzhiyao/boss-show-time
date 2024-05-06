@@ -1,7 +1,7 @@
+import dayjs from "dayjs";
 import { isOutsource } from "../../data/outsource"
 import { isTraining } from "../../data/training";
-import {convertTimeToHumanReadable } from "../../utils"
-import dayjs from 'dayjs';
+import { convertTimeToHumanReadable } from "../../utils"
 import onlineFilter from './onlineFilter';
 
 export function getBossData(responseText) {
@@ -61,10 +61,10 @@ function mutationContainer () {
 function parseBossData(list, getListItem) {
     list.forEach(item => {
         const {
-            itemId, lastModifyTime,brandName
+            itemId, lastModifyTime, brandName
         }  = item;
         const timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
-        const time = "【"+timeHumanReadable+"更新】";
+        const time = dayjs(lastModifyTime).format('YYYY-MM-DD') + "【"+timeHumanReadable+"更新】";
         const dom = getListItem(itemId);
         let tag = createDOM(time,brandName); 
         dom.appendChild(tag);
@@ -76,15 +76,16 @@ function createDOM(time,brandName) {
     div.classList.add('__boss_time_tag');
     const isOutsourceBrand = isOutsource(brandName);
     const isTrainingBrand = isTraining(brandName);
-    var text = time;
+    let text = time;
+    
     if(isOutsourceBrand){
-        text+="【疑似外包公司】";
-        div.style = "color:red;font-size:12px;background-color: yellow;";
+        text += "【疑似外包公司】";
+        div.classList.add('__is_outsourcing_or_training');
     }
     if(isTrainingBrand){
-        text+="【疑似培训机构】";
-        div.style = "color:red;font-size:12px;background-color: yellow;";
+        text += "【疑似培训机构】";
+        div.classList.add('__is_outsourcing_or_training');
     }
-    div.innerText = text;
+    div.innerHTML = text;
     return div;
 }
