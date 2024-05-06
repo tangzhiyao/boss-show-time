@@ -40,19 +40,19 @@ export function convertTimeToHumanReadable(dateTime) {
 	let timestamp_diff = timestamp_current - timestamp_input;
  
 	// 计算时间差共有多少个分钟
-	let minC = timestamp_diff / minute;
+	let minC = Number.parseInt(timestamp_diff / minute);
 	// 计算时间差共有多少个小时
-	let hourC = timestamp_diff / hour;
+	let hourC = Number.parseInt(timestamp_diff / hour);
 	// 计算时间差共有多少个天
-	let dayC = timestamp_diff / day;
+	let dayC = Number.parseInt(timestamp_diff / day);
 	// 计算时间差共有多少个周
-	let weekC = timestamp_diff / week;
+	let weekC = Number.parseInt(timestamp_diff / week);
 	// 计算时间差共有多少个月
-	let monthC = timestamp_diff / month;
- 
+	let monthC = Number.parseInt(timestamp_diff / month);
+
 	if (monthC >= 1 && monthC < 4) {
 		return parseInt(monthC) + "月前";
-	} else if (weekC >= 1 && weekC < 4) {
+	} else if (weekC >= 1 && weekC <= 4) {
 		return parseInt(weekC) + "周前";
 	} else if (dayC >= 1 && dayC < 7) {
 		return parseInt(dayC) + "天前";
@@ -64,7 +64,7 @@ export function convertTimeToHumanReadable(dateTime) {
 		// 时间差大于0并且小于1分钟
 		return "刚刚";
 	} else {
-		return _date.getFullYear() + "年" + _date.getMonth() + "月" + _date.getDate() + "日";
+		return _date.getFullYear() + "年" + (_date.getMonth()+1) + "月" + _date.getDate() + "日";
 	}
 }
  
