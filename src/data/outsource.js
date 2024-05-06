@@ -322,6 +322,10 @@ const data = [
   "ST 新海",
   "天源迪科",
   "塔塔",
+  "海南钦诚",
+  "信必优Symbio",
+  "成都信必优信息技术有限公司",
+  "上海仁联"
 ];
 
 export function isOutsource(brandName) {

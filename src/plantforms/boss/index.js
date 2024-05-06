@@ -1,4 +1,5 @@
 import { isOutsource } from "../../data/outsource"
+import { isTraining } from "../../data/training";
 import {convertTimeToHumanReadable } from "../../utils"
 
 export function getBossData(responseText) {
@@ -71,9 +72,14 @@ function createDOM(time,brandName) {
     const div = document.createElement('div');
     div.classList.add('__boss_time_tag');
     const isOutsourceBrand = isOutsource(brandName);
+    const isTrainingBrand = isTraining(brandName);
     var text = time;
     if(isOutsourceBrand){
         text+="【疑似外包公司】";
+        div.style = "color:red;font-size:12px;background-color: yellow;";
+    }
+    if(isTrainingBrand){
+        text+="【疑似培训机构】";
         div.style = "color:red;font-size:12px;background-color: yellow;";
     }
     div.innerText = text;
