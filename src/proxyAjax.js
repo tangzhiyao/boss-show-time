@@ -9,7 +9,7 @@
     }   
     CustomEvent.prototype = window.Event.prototype;   
     window.CustomEvent = CustomEvent;
-  })();
+})();
   
   ;(function () {
     function ajaxEventTrigger(event) {
@@ -78,4 +78,14 @@
         window.dispatchEvent(event);
     }
   });
-  
+
+  ;(function() {
+    // 由于注入脚本的时候 DOMContentLoaded 已经触发，监听不到
+    // proxy 脚本已加载，发送事件
+    let event = new CustomEvent('proxyScriptLoaded', { detail: {
+        zhipin: {
+           initialState: window.__INITIAL_STATE__
+        }
+    } });
+    window.dispatchEvent(event);
+  })();

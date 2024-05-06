@@ -11,14 +11,14 @@ export function renderTimeTag(divElement, lastModifyTime, brandName) {
   const isTrainingBrand = isTraining(brandName);
   var text = timeText;
   var style =
-    "color:white;font-size:12px;background-color: " +
-    getTimeColorByoffsetTimeDay(offsetTimeDay) +
-    ";";
+    "color:white;font-size:12px;background-color: " + getTimeColorByoffsetTimeDay(offsetTimeDay) + ";";
   if (isOutsourceBrand) {
     text += "【疑似外包公司】";
+    divElement.classList.add("__is_outsourcing_or_training");
   }
   if (isTrainingBrand) {
     text += "【疑似培训机构】";
+    divElement.classList.add("__is_outsourcing_or_training");
   }
   if (isOutsourceBrand || isTrainingBrand) {
     text += "⛅";
@@ -26,7 +26,7 @@ export function renderTimeTag(divElement, lastModifyTime, brandName) {
     text += "☀";
   }
   divElement.style = style;
-  divElement.innerText = text;
+  divElement.innerHTML = text;
 }
 
 function getTimeColorByoffsetTimeDay(offsetTimeDay) {

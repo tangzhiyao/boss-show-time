@@ -6,7 +6,6 @@ export function getZhiLianData(responseText) {
         mutationContainer().then((node) => {
             parseZhiPinData(data?.data?.list || [], getListByNode(node));
         })
-        return 
     } catch(err) {
         console.error('解析 JSON 失败', err);
     }
@@ -43,10 +42,11 @@ function mutationContainer () {
 function parseZhiPinData(list, getListItem) {
     list.forEach((item, index) => {
         const {
-            firstPublishTime,companyName
+            firstPublishTime,
+            companyName,
         }  = item;
         const dom = getListItem(index);
-        let tag = createDOM(firstPublishTime,companyName); 
+        let tag = createDOM(firstPublishTime, companyName); 
         dom.appendChild(tag);
     });
 }
