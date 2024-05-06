@@ -80,11 +80,9 @@ function createDOM(time,brandName,offsetTimeDay) {
     var style = "color:white;font-size:12px;background-color: "+getTimeColorByoffsetTimeDay(offsetTimeDay)+";"
     if(isOutsourceBrand){
         text+="【疑似外包公司】";
-        style += "color:navajowhite;"
     }
     if(isTrainingBrand){
         text+="【疑似培训机构】";
-        style += "color:navajowhite;"
     }
     if(isOutsourceBrand||isTrainingBrand){
         text+="⛅";
