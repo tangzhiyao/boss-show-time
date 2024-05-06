@@ -7,6 +7,7 @@ export function getBossData(responseText) {
         const data = JSON.parse(responseText);
         mutationContainer().then((node) => {
             parseBossData(data?.zpData?.jobList || [], getListByNode(node));
+            handleBossOnlineFilter(data?.zpData?.jobList || []);
         })
         return 
     } catch(err) {
@@ -84,4 +85,23 @@ function createDOM(time,brandName) {
     }
     div.innerText = text;
     return div;
+}
+
+/**
+ * 当ajax请求返回数据，派发自定义事件，将招聘人不在线的job id传递给自定义filter——"招聘人在线"的事件监听器
+ * @param {Array} results - 最新职位列表数据
+ */
+function handleBossOnlineFilter(results) {
+    let tmpArr = [];
+    results.forEach((r) => {
+        if (!r.bossOnline) {
+            tmpArr.push(r.itemId);
+        }
+    });
+
+    window.dispatchEvent(new CustomEvent('job-list-change', {
+        detail: {
+            bossOfflineJobIds: tmpArr
+        }
+    }));
 }
