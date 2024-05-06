@@ -1,9 +1,10 @@
-
+import dayjs from "dayjs";
 export function createScript(src) {
     const script = document.createElement('script');
     script.setAttribute('src', src);
     return script;
 }
+
 
 export function createLink(href) {
     const link = document.createElement('link');
@@ -15,56 +16,41 @@ export function createLink(href) {
     link.setAttribute('crossorigin', 'anonymous');
     return link;
 }
-
-// 用毫秒表示分钟、小时、天、周、月
-let minute = 1000 * 60;
-let hour = minute * 60;
-let day = hour * 24;
-let week = day * 7;
-let month = day * 30;
  
  
-// 传入时间格式或时间戳，这里传入的时间格式: 2022-08-05T08:17:14.000+00:00
+// 转换时间
 export function convertTimeToHumanReadable(dateTime) {
- 
-	// 获取当前时间并转换为时间戳，方便计算
-	let timestamp_current = new Date().getTime();
- 
-	// 将传入的时间格式字符串解析为Date对象
-	let _date = new Date(dateTime);
- 
-	// 将Date对象转换为时间戳，方便计算
-	let timestamp_input = _date.getTime();
- 
-	// 计算当前时间与传入的时间之间相差的时间戳
-	let timestamp_diff = timestamp_current - timestamp_input;
- 
+    let date = dayjs(dateTime);
+    let curDate = dayjs();
+	
 	// 计算时间差共有多少个分钟
-	let minC = timestamp_diff / minute;
+	let minC = curDate.diff(date, 'minute', true);
 	// 计算时间差共有多少个小时
-	let hourC = timestamp_diff / hour;
+	let hourC = curDate.diff(date, 'hour', true);
 	// 计算时间差共有多少个天
-	let dayC = timestamp_diff / day;
+	let dayC = curDate.diff(date, 'day', true);
 	// 计算时间差共有多少个周
-	let weekC = timestamp_diff / week;
+	let weekC = curDate.diff(date, 'week', true);
 	// 计算时间差共有多少个月
-	let monthC = timestamp_diff / month;
+	let monthC = curDate.diff(date, 'month', true);
  
-	if (monthC >= 1 && monthC < 4) {
-		return parseInt(monthC) + "月前";
-	} else if (weekC >= 1 && weekC < 4) {
-		return parseInt(weekC) + "周前";
-	} else if (dayC >= 1 && dayC < 7) {
-		return parseInt(dayC) + "天前";
-	} else if (hourC >= 1 && hourC < 24) {
-		return parseInt(hourC) + "小时前";
-	} else if (minC >= 1 && minC < 60) {
-		return parseInt(minC) + "分钟前";
-	} else if ((timestamp_diff >= 0) && (timestamp_diff <= minute)) {
-		// 时间差大于0并且小于1分钟
-		return "刚刚";
-	} else {
-		return _date.getFullYear() + "年" + _date.getMonth() + "月" + _date.getDate() + "日";
-	}
+    if(minC < 5) {
+        return `<span class="__rencent_update">刚刚</span>`;
+    } else if (minC < 60) {
+        return `<span class="__rencent_update">1小时内</span>`;
+    } else if (hourC < 24) {
+        return `<span class="__rencent_update">1天内</span>`;
+    } else if (dayC < 7) {
+        return `<span class="__rencent_update">${parseInt(dayC)}天内</span>`
+    } else if (monthC < 1) {
+        return `${parseInt(Math.ceil(weekC))}周内`
+    } else if (monthC <= 2) {
+        return `2个月内`
+    } else if (monthC <= 3) {
+        return `3个月内`
+    } else {
+        return '超出3个月';
+    }
+
 }
  
