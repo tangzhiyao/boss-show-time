@@ -66,7 +66,7 @@
     const data = {
         response: xhr?.response,
         responseType: xhr?.responseType,
-        responseURL: xhr?.responseURL,
+        responseURL: xhr?.responseURL?xhr.responseURL:xhr?.orignUrl,
         status: xhr?.status,
         statusText: xhr?.statusText,
         readyState: xhr?.readyState,

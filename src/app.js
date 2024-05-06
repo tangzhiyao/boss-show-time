@@ -1,5 +1,6 @@
 import { getBossData } from './plantforms/boss/index.js';
 import { getZhiLianData } from './plantforms/zhilian/index.js';
+import { getJob51Data } from './plantforms/job51/index.js'
 import zhilianFirstOpen from './plantforms/zhilian/firstOpen.js';
 
 import './app.css'; // 为了能够走打包逻辑，如果不想在这写，那么直接放在 webpack 里也行
@@ -25,13 +26,20 @@ import $ from 'jquery';
         if(!data) return;
         const responseURL = data?.responseURL;
         // boss 直聘接口
-        if(responseURL.indexOf('/search/joblist.json') !== -1) {
-            getBossData(data?.response);
-        }
+        if(responseURL){
+            if(responseURL.indexOf('/search/joblist.json') !== -1) {
+                getBossData(data?.response);
+            }
 
-        // 智联招聘接口
-        if(responseURL.indexOf('/search/positions') !== -1) {
-            getZhiLianData(data?.response, true);
+            // 智联招聘接口
+            if(responseURL.indexOf('/search/positions') !== -1) {
+                getZhiLianData(data?.response, true);
+            }
+            
+            // 前程无忧接口
+            if(responseURL.indexOf('/api/job/search-pc') !== -1) {
+                getJob51Data(data?.response, true);
+            }
         }
     })
 

@@ -14,7 +14,8 @@
             "js": ["app.js"],
             "matches": [
                 "https://www.zhipin.com/*",
-                "https://sou.zhaopin.com/*"
+                "https://sou.zhaopin.com/*",
+                "https://we.51job.com/*"
             ]
         }
     ],
@@ -23,7 +24,8 @@
             "resources": ["proxyAjax.js", "app.css"],
             "matches": [
                 "https://www.zhipin.com/*", 
-                "https://sou.zhaopin.com/*"
+                "https://sou.zhaopin.com/*",
+                "https://we.51job.com/*"
             ]
         },
         {
@@ -38,6 +40,7 @@
     ],
     "host_permissions": [
         "https://www.zhipin.com/*",
-        "https://sou.zhaopin.com/*"
+        "https://sou.zhaopin.com/*",
+        "https://we.51job.com/*"
     ]
 }
