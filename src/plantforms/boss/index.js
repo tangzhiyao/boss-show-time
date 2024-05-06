@@ -1,3 +1,4 @@
+import dayjs from "dayjs";
 import { isOutsource } from "../../data/outsource"
 import { isTraining } from "../../data/training";
 import {convertTimeToHumanReadable } from "../../utils"
@@ -64,27 +65,49 @@ function parseBossData(list, getListItem) {
         const timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
         const time = "【"+timeHumanReadable+"更新】";
         const dom = getListItem(itemId);
-        let tag = createDOM(time,brandName); 
+        const offsetTimeDay = dayjs().diff(dayjs(lastModifyTime),"day");
+        let tag = createDOM(time,brandName,offsetTimeDay); 
         dom.appendChild(tag);
     });
 }
 
-function createDOM(time,brandName) {
+function createDOM(time,brandName,offsetTimeDay) {
     const div = document.createElement('div');
     div.classList.add('__boss_time_tag');
     const isOutsourceBrand = isOutsource(brandName);
     const isTrainingBrand = isTraining(brandName);
     var text = time;
+    var style = "color:white;font-size:12px;background-color: "+getTimeColorByoffsetTimeDay(offsetTimeDay)+";"
     if(isOutsourceBrand){
         text+="【疑似外包公司】";
-        div.style = "color:red;font-size:12px;background-color: yellow;";
+        style += "color:navajowhite;"
     }
     if(isTrainingBrand){
         text+="【疑似培训机构】";
-        div.style = "color:red;font-size:12px;background-color: yellow;";
+        style += "color:navajowhite;"
     }
+    if(isOutsourceBrand||isTrainingBrand){
+        text+="⛅";
+    }else{
+        text+="☀";
+    }
+    div.style = style;
     div.innerText = text;
     return div;
+}
+
+function getTimeColorByoffsetTimeDay(offsetTimeDay){
+    if(offsetTimeDay <= 7){
+        return "yellowgreen";
+    }else if(offsetTimeDay <= 14){
+        return "green";
+    }else if(offsetTimeDay <= 28){
+        return "orange";
+    }else if(offsetTimeDay <= 56){
+        return "red";
+    }else{
+        return "gray";
+    }
 }
 
 /**
