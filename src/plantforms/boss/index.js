@@ -1,7 +1,4 @@
-import dayjs from "dayjs";
-import { isOutsource } from "../../data/outsource"
-import { isTraining } from "../../data/training";
-import {convertTimeToHumanReadable } from "../../utils"
+import { renderTimeTag } from "../../commonRender";
 
 export function getBossData(responseText) {
     try {
@@ -62,51 +59,19 @@ function parseBossData(list, getListItem) {
         const {
             itemId, lastModifyTime,brandName
         }  = item;
-        const timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
-        const time = "【"+timeHumanReadable+"更新】";
         const dom = getListItem(itemId);
-        const offsetTimeDay = dayjs().diff(dayjs(lastModifyTime),"day");
-        let tag = createDOM(time,brandName,offsetTimeDay); 
+        let tag = createDOM(lastModifyTime,brandName); 
         dom.appendChild(tag);
     });
 }
 
-function createDOM(time,brandName,offsetTimeDay) {
+function createDOM(lastModifyTime,brandName) {
     const div = document.createElement('div');
     div.classList.add('__boss_time_tag');
-    const isOutsourceBrand = isOutsource(brandName);
-    const isTrainingBrand = isTraining(brandName);
-    var text = time;
-    var style = "color:white;font-size:12px;background-color: "+getTimeColorByoffsetTimeDay(offsetTimeDay)+";"
-    if(isOutsourceBrand){
-        text+="【疑似外包公司】";
-    }
-    if(isTrainingBrand){
-        text+="【疑似培训机构】";
-    }
-    if(isOutsourceBrand||isTrainingBrand){
-        text+="⛅";
-    }else{
-        text+="☀";
-    }
-    div.style = style;
-    div.innerText = text;
+    renderTimeTag(div,lastModifyTime,brandName);
     return div;
 }
 
-function getTimeColorByoffsetTimeDay(offsetTimeDay){
-    if(offsetTimeDay <= 7){
-        return "yellowgreen";
-    }else if(offsetTimeDay <= 14){
-        return "green";
-    }else if(offsetTimeDay <= 28){
-        return "orange";
-    }else if(offsetTimeDay <= 56){
-        return "red";
-    }else{
-        return "gray";
-    }
-}
 
 /**
  * 当ajax请求返回数据，派发自定义事件，将招聘人不在线的job id传递给自定义filter——"招聘人在线"的事件监听器

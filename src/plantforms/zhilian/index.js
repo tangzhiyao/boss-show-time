@@ -1,3 +1,4 @@
+import { renderTimeTag } from "../../commonRender";
 
 export function getZhiLianData(responseText) {
     try {
@@ -42,17 +43,17 @@ function mutationContainer () {
 function parseZhiPinData(list, getListItem) {
     list.forEach((item, index) => {
         const {
-            firstPublishTime,
+            firstPublishTime,companyName
         }  = item;
         const dom = getListItem(index);
-        let tag = createDOM(`发布时间：${firstPublishTime}`); 
+        let tag = createDOM(firstPublishTime,companyName); 
         dom.appendChild(tag);
     });
 }
 
-export function createDOM(time) {
+export function createDOM(lastModifyTime,brandName) {
     const div = document.createElement('div');
     div.classList.add('__zhipin_time_tag');
-    div.innerText = time;
+    renderTimeTag(div,lastModifyTime,brandName);
     return div;
 }

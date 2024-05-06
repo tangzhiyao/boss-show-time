@@ -8,11 +8,11 @@ import { createDOM } from './index';
 
     positionList.forEach((item, index) => {
         const {
-            firstPublishTime,
+            firstPublishTime,companyName
         }  = item;
         const dom = children?.[index];
         if(!dom) return;
-        let tag = createDOM(`发布时间：${firstPublishTime}`); 
+        let tag = createDOM(firstPublishTime,companyName); 
         dom.appendChild(tag);
     });
 })()
