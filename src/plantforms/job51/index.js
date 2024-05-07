@@ -1,11 +1,11 @@
-import { renderTimeTag,setupSortJobItem,renderSortJobItem } from "../../commonRender";
+import { renderTimeTag,setupSortJobItem,renderSortJobItem  } from "../../commonRender";
 
-export function getZhiLianData(responseText) {
+export function getJob51Data(responseText) {
     try {
         const data = JSON.parse(responseText);
         mutationContainer().then((node) => {
             setupSortJobItem(node);
-            parseZhiPinData(data?.data?.list || [], getListByNode(node));
+            parseData(data?.resultbody?.job?.items || [], getListByNode(node));
         })
     } catch(err) {
         console.error('解析 JSON 失败', err);
@@ -24,8 +24,8 @@ function getListByNode(node) {
 // 监听 positionList-hook 节点，判断职位列表是否被挂载
 function mutationContainer () {
    return new Promise((resolve, reject) => {
-        const dom = document.querySelector('.positionlist');
-        const observer = new MutationObserver(function(childList) {
+        const dom = document.querySelector('.joblist');
+        const observer = new MutationObserver(function(childList, obs) {
             const isAdd = (childList || []).some(item => {
                return item?.addedNodes?.length > 0
             });
@@ -40,14 +40,14 @@ function mutationContainer () {
 }
 
 // 解析数据，插入时间标签
-function parseZhiPinData(list, getListItem) {
+function parseData(list, getListItem) {
     list.forEach((item, index) => {
         const {
-            firstPublishTime,
+            updateDateTime,
             companyName,
         }  = item;
         const dom = getListItem(index);
-        let tag = createDOM(firstPublishTime, companyName); 
+        let tag = createDOM(updateDateTime, companyName); 
         dom.appendChild(tag);
     });
     renderSortJobItem(list, getListItem);
@@ -55,7 +55,7 @@ function parseZhiPinData(list, getListItem) {
 
 export function createDOM(lastModifyTime,brandName) {
     const div = document.createElement('div');
-    div.classList.add('__zhipin_time_tag');
+    div.classList.add('__job51_time_tag');
     renderTimeTag(div,lastModifyTime,brandName);
     return div;
 }

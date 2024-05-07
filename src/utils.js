@@ -35,13 +35,13 @@ export function convertTimeToHumanReadable(dateTime) {
 	let monthC = curDate.diff(date, 'month', true);
  
     if(minC < 5) {
-        return `<span class="__rencent_update">刚刚</span>`;
+        return `刚刚`;
     } else if (minC < 60) {
-        return `<span class="__rencent_update">1小时内</span>`;
+        return `1小时内`;
     } else if (hourC < 24) {
-        return `<span class="__rencent_update">1天内</span>`;
+        return `1天内`;
     } else if (dayC < 7) {
-        return `<span class="__rencent_update">${parseInt(dayC)}天内</span>`
+        return `${parseInt(dayC)}天内`
     } else if (monthC < 1) {
         return `${parseInt(Math.ceil(weekC))}周内`
     } else if (monthC <= 2) {

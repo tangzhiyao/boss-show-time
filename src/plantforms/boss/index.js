@@ -1,13 +1,11 @@
-import dayjs from "dayjs";
-import { isOutsource } from "../../data/outsource"
-import { isTraining } from "../../data/training";
-import { convertTimeToHumanReadable } from "../../utils"
+import { renderTimeTag,setupSortJobItem,renderSortJobItem } from "../../commonRender";
 import onlineFilter from './onlineFilter';
 
 export function getBossData(responseText) {
     try {
         const data = JSON.parse(responseText);
         mutationContainer().then((node) => {
+            setupSortJobItem(node);
             parseBossData(data?.zpData?.jobList || [], getListByNode(node));
             onlineFilter();
         })
@@ -63,29 +61,16 @@ function parseBossData(list, getListItem) {
         const {
             itemId, lastModifyTime, brandName
         }  = item;
-        const timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
-        const time = dayjs(lastModifyTime).format('YYYY-MM-DD') + "【"+timeHumanReadable+"更新】";
         const dom = getListItem(itemId);
-        let tag = createDOM(time,brandName); 
+        let tag = createDOM(lastModifyTime,brandName); 
         dom.appendChild(tag);
     });
+    renderSortJobItem(list, getListItem);
 }
 
-function createDOM(time,brandName) {
+function createDOM(lastModifyTime,brandName) {
     const div = document.createElement('div');
     div.classList.add('__boss_time_tag');
-    const isOutsourceBrand = isOutsource(brandName);
-    const isTrainingBrand = isTraining(brandName);
-    let text = time;
-    
-    if(isOutsourceBrand){
-        text += "【疑似外包公司】";
-        div.classList.add('__is_outsourcing_or_training');
-    }
-    if(isTrainingBrand){
-        text += "【疑似培训机构】";
-        div.classList.add('__is_outsourcing_or_training');
-    }
-    div.innerHTML = text;
+    renderTimeTag(div,lastModifyTime,brandName);
     return div;
 }

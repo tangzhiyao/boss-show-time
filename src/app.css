@@ -20,6 +20,17 @@
     border-radius: 0 0 0 4px;
 } */
 
+.__job51_time_tag{
+    position: absolute;
+    right: 0;
+    top: 0;
+    background: rgba(229, 248, 248);
+    color: #00a6a7;
+    padding: 0 8px;
+    font-size: 14px;
+    border-radius: 0 0 0 4px;
+}
+
 /* 与BOSS直聘的筛选器样式 .condition-filter-select .current-select 保持一致*/
 .__boss_filter.condition-filter-select .current-select::after {
     content: unset;
@@ -32,9 +43,7 @@
 }
 
 .__is_outsourcing_or_training {
-    color:red;
-    font-size:12px;
-    background-color: yellow;
+    
 }
 
 .__rencent_update {
