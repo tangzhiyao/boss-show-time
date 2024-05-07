@@ -1,5 +1,5 @@
 name: build
-run-name: ${{ github.actor }} is learning actions
+run-name: ${{ github.actor }} 构建插件
 on: 
     push:
         branches:
