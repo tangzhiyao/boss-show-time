@@ -4,9 +4,21 @@ import { isTraining } from "./data/training";
 import { convertTimeToHumanReadable } from "./utils";
 
 export function renderTimeTag(divElement, lastModifyTime, brandName) {
-  const timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
-  const timeText = "【" + timeHumanReadable + "更新】";
-  const offsetTimeDay = dayjs().diff(dayjs(lastModifyTime), "day");
+  var timeHumanReadable;
+  var timeText;
+  if (lastModifyTime) {
+    timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
+    timeText = "【" + timeHumanReadable + "更新】";
+  } else {
+    timeHumanReadable = "【" + "未找到更新时间" + "】";
+    timeText = timeHumanReadable;
+  }
+  var offsetTimeDay;
+  if (lastModifyTime) {
+    offsetTimeDay = dayjs().diff(dayjs(lastModifyTime), "day");
+  } else {
+    lastModifyTime = -1;
+  }
   const isOutsourceBrand = isOutsource(brandName);
   const isTrainingBrand = isTraining(brandName);
   var text = timeText;
@@ -32,24 +44,28 @@ export function renderTimeTag(divElement, lastModifyTime, brandName) {
 }
 
 function getTimeColorByoffsetTimeDay(offsetTimeDay) {
-  if (offsetTimeDay <= 7) {
-    return "yellowgreen";
-  } else if (offsetTimeDay <= 14) {
-    return "green";
-  } else if (offsetTimeDay <= 28) {
-    return "orange";
-  } else if (offsetTimeDay <= 56) {
-    return "red";
+  if (offsetTimeDay >= 0) {
+    if (offsetTimeDay <= 7) {
+      return "yellowgreen";
+    } else if (offsetTimeDay <= 14) {
+      return "green";
+    } else if (offsetTimeDay <= 28) {
+      return "orange";
+    } else if (offsetTimeDay <= 56) {
+      return "red";
+    } else {
+      return "gray";
+    }
   } else {
-    return "gray";
+    return "black";
   }
 }
 
 export function setupSortJobItem(node) {
   node.style = "display:flex;flex-direction: column;";
   //for zhilian
-  const paginationNode = node.querySelector('.pagination');
-  if(paginationNode){
+  const paginationNode = node.querySelector(".pagination");
+  if (paginationNode) {
     paginationNode.style = "order:99999;";
   }
 }
