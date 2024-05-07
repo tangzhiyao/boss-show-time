@@ -1,10 +1,11 @@
-import { renderTimeTag } from "../../commonRender";
+import { renderTimeTag,setupSortJobItem,renderSortJobItem } from "../../commonRender";
 import onlineFilter from './onlineFilter';
 
 export function getBossData(responseText) {
     try {
         const data = JSON.parse(responseText);
         mutationContainer().then((node) => {
+            setupSortJobItem(node);
             parseBossData(data?.zpData?.jobList || [], getListByNode(node));
             onlineFilter();
         })
@@ -64,6 +65,7 @@ function parseBossData(list, getListItem) {
         let tag = createDOM(lastModifyTime,brandName); 
         dom.appendChild(tag);
     });
+    renderSortJobItem(list, getListItem);
 }
 
 function createDOM(lastModifyTime,brandName) {

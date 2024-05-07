@@ -1,9 +1,10 @@
-import { renderTimeTag } from "../../commonRender";
+import { renderTimeTag,setupSortJobItem,renderSortJobItem  } from "../../commonRender";
 
 export function getJob51Data(responseText) {
     try {
         const data = JSON.parse(responseText);
         mutationContainer().then((node) => {
+            setupSortJobItem(node);
             parseData(data?.resultbody?.job?.items || [], getListByNode(node));
         })
     } catch(err) {
@@ -49,6 +50,7 @@ function parseData(list, getListItem) {
         let tag = createDOM(updateDateTime, companyName); 
         dom.appendChild(tag);
     });
+    renderSortJobItem(list, getListItem);
 }
 
 export function createDOM(lastModifyTime,brandName) {

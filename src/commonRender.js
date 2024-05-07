@@ -11,7 +11,9 @@ export function renderTimeTag(divElement, lastModifyTime, brandName) {
   const isTrainingBrand = isTraining(brandName);
   var text = timeText;
   var style =
-    "color:white;font-size:12px;background-color: " + getTimeColorByoffsetTimeDay(offsetTimeDay) + ";";
+    "color:white;font-size:12px;background-color: " +
+    getTimeColorByoffsetTimeDay(offsetTimeDay) +
+    ";";
   if (isOutsourceBrand) {
     text += "【疑似外包公司】";
     divElement.classList.add("__is_outsourcing_or_training");
@@ -41,4 +43,43 @@ function getTimeColorByoffsetTimeDay(offsetTimeDay) {
   } else {
     return "gray";
   }
+}
+
+export function setupSortJobItem(node) {
+  node.style = "display:flex;flex-direction: column;";
+  //for zhilian
+  const paginationNode = node.querySelector('.pagination');
+  if(paginationNode){
+    paginationNode.style = "order:99999;";
+  }
+}
+
+export function renderSortJobItem(list, getListItem) {
+  const idAndSortIndexMap = new Map();
+  const sortList = JSON.parse(JSON.stringify(list)).sort((o1, o2) => {
+    return (
+      dayjs(
+        o2.lastModifyTime
+          ? o2.lastModifyTime
+          : o2.updateDateTime
+          ? o2.updateDateTime
+          : o2.firstPublishTime
+      ).valueOf() -
+      dayjs(
+        o1.lastModifyTime
+          ? o1.lastModifyTime
+          : o1.updateDateTime
+          ? o1.updateDateTime
+          : o1.firstPublishTime
+      ).valueOf()
+    );
+  });
+  sortList.forEach((item, index) => {
+    idAndSortIndexMap.set(JSON.stringify(item), index);
+  });
+  list.forEach((item, index) => {
+    const { itemId } = item;
+    const dom = getListItem(itemId ? itemId : index);
+    dom.style = "order:" + idAndSortIndexMap.get(JSON.stringify(item));
+  });
 }

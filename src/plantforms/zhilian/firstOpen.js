@@ -1,8 +1,11 @@
+import { setupSortJobItem,renderSortJobItem } from "../../commonRender";
 import { createDOM } from './index';
 
 // 智联招聘首次打开页面时是服务端渲染，没法监听接口，但是 html 中保存了列表数据
 export default function firstOpen(data) {
-    const children = document.querySelector('.positionlist')?.children;
+    const dom = document.querySelector('.positionlist');
+    setupSortJobItem(dom);
+    const children = dom?.children;
     const { positionList = [] } = data;
     if(!children || !positionList || positionList.lenth === 0) return;
 
@@ -17,4 +20,7 @@ export default function firstOpen(data) {
         let tag = createDOM(firstPublishTime, companyName); 
         dom.appendChild(tag);
     });
+    renderSortJobItem(positionList,(index)=>{
+        return children?.[index];
+    })
 }

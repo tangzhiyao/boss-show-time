@@ -1,9 +1,10 @@
-import { renderTimeTag } from "../../commonRender";
+import { renderTimeTag,setupSortJobItem,renderSortJobItem } from "../../commonRender";
 
 export function getZhiLianData(responseText) {
     try {
         const data = JSON.parse(responseText);
         mutationContainer().then((node) => {
+            setupSortJobItem(node);
             parseZhiPinData(data?.data?.list || [], getListByNode(node));
         })
     } catch(err) {
@@ -49,6 +50,7 @@ function parseZhiPinData(list, getListItem) {
         let tag = createDOM(firstPublishTime, companyName); 
         dom.appendChild(tag);
     });
+    renderSortJobItem(list, getListItem);
 }
 
 export function createDOM(lastModifyTime,brandName) {
