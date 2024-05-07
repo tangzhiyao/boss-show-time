@@ -24,7 +24,7 @@ function getListByNode(node) {
 function mutationContainer () {
    return new Promise((resolve, reject) => {
         const dom = document.querySelector('.positionlist');
-        const observer = new MutationObserver(function(childList, obs) {
+        const observer = new MutationObserver(function(childList) {
             const isAdd = (childList || []).some(item => {
                return item?.addedNodes?.length > 0
             });
