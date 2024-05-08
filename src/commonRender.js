@@ -4,52 +4,84 @@ import { isTraining } from "./data/training";
 import { convertTimeToHumanReadable } from "./utils";
 
 export function renderTimeTag(divElement, lastModifyTime, brandName) {
-  const timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
-  const timeText = "【" + timeHumanReadable + "更新】";
-  const offsetTimeDay = dayjs().diff(dayjs(lastModifyTime), "day");
+  var timeHumanReadable;
+  var timeText;
+  if (lastModifyTime) {
+    timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
+    timeText = "【" + timeHumanReadable + "更新】";
+  } else {
+    timeHumanReadable = "【" + "未找到更新时间" + "】";
+    timeText = timeHumanReadable;
+  }
+  var text = timeText;
+  text += getCompanyInfoText(brandName);
+  divElement.style = getRenderTimeStyle(lastModifyTime);
+  divElement.innerHTML = text;
+}
+
+export function renderTimeLoadingTag(divElement, brandName) {
+  var timeText = "【正查找更新时间⌛︎】";
+  var text = timeText;
+  text += getCompanyInfoText(brandName);
+  divElement.style = getRenderTimeStyle();
+  divElement.innerHTML = text;
+}
+
+function getCompanyInfoText(brandName) {
+  var text = "";
   const isOutsourceBrand = isOutsource(brandName);
   const isTrainingBrand = isTraining(brandName);
-  var text = timeText;
-  var style =
-    "color:white;font-size:12px;background-color: " +
-    getTimeColorByoffsetTimeDay(offsetTimeDay) +
-    ";";
   if (isOutsourceBrand) {
     text += "【疑似外包公司】";
-    divElement.classList.add("__is_outsourcing_or_training");
   }
   if (isTrainingBrand) {
     text += "【疑似培训机构】";
-    divElement.classList.add("__is_outsourcing_or_training");
   }
   if (isOutsourceBrand || isTrainingBrand) {
     text += "⛅";
   } else {
     text += "☀";
   }
-  divElement.style = style;
-  divElement.innerHTML = text;
+  return text;
+}
+
+function getRenderTimeStyle(lastModifyTime) {
+  var offsetTimeDay;
+  if (lastModifyTime) {
+    offsetTimeDay = dayjs().diff(dayjs(lastModifyTime), "day");
+  } else {
+    lastModifyTime = -1;
+  }
+  return (
+    "color:white;font-size:12px;background-color: " +
+    getTimeColorByoffsetTimeDay(offsetTimeDay) +
+    ";"
+  );
 }
 
 function getTimeColorByoffsetTimeDay(offsetTimeDay) {
-  if (offsetTimeDay <= 7) {
-    return "yellowgreen";
-  } else if (offsetTimeDay <= 14) {
-    return "green";
-  } else if (offsetTimeDay <= 28) {
-    return "orange";
-  } else if (offsetTimeDay <= 56) {
-    return "red";
+  if (offsetTimeDay >= 0) {
+    if (offsetTimeDay <= 7) {
+      return "yellowgreen";
+    } else if (offsetTimeDay <= 14) {
+      return "green";
+    } else if (offsetTimeDay <= 28) {
+      return "orange";
+    } else if (offsetTimeDay <= 56) {
+      return "red";
+    } else {
+      return "gray";
+    }
   } else {
-    return "gray";
+    return "black";
   }
 }
 
 export function setupSortJobItem(node) {
   node.style = "display:flex;flex-direction: column;";
   //for zhilian
-  const paginationNode = node.querySelector('.pagination');
-  if(paginationNode){
+  const paginationNode = node.querySelector(".pagination");
+  if (paginationNode) {
     paginationNode.style = "order:99999;";
   }
 }

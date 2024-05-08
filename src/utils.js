@@ -53,4 +53,7 @@ export function convertTimeToHumanReadable(dateTime) {
     }
 
 }
- 
+
+export function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
