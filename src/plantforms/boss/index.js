@@ -2,6 +2,7 @@ import {
   renderTimeTag,
   setupSortJobItem,
   renderSortJobItem,
+  renderTimeLoadingTag,
 } from "../../commonRender";
 import onlineFilter from "./onlineFilter";
 
@@ -57,12 +58,14 @@ function mutationContainer() {
 function parseBossData(list, getListItem) {
   const urlList = [];
   list.forEach((item) => {
-    const { itemId } = item;
+    const { itemId, brandName } = item;
     const dom = getListItem(itemId);
     const jobItemDetailUrl = dom.childNodes[0].childNodes[0].href;
     const url = new URL(jobItemDetailUrl);
     var pureJobItemDetailUrl = url.origin + url.pathname;
     urlList.push(pureJobItemDetailUrl);
+    let loadingLastModifyTimeTag = createLoadingDOM(brandName);
+    dom.appendChild(loadingLastModifyTimeTag);
   });
   let promiseList = [];
   urlList.forEach((url) => {
@@ -102,10 +105,8 @@ function parseBossData(list, getListItem) {
     promiseList.push(promise);
   });
   const lastModifyTimeList = [];
-  console.log("loading job item lastModifyTime start");
   Promise.allSettled(promiseList)
     .then((textList) => {
-      console.log("loading job item lastModifyTime end");
       textList.forEach((item) => {
         const regxMatchArrayResult = item.value.match(
           '<p class="gray">更新于：.*</p>'
@@ -128,10 +129,10 @@ function parseBossData(list, getListItem) {
         let tag = createDOM(lastModifyTime, brandName);
         dom.appendChild(tag);
       });
+      hiddenLoadingDOM();
       renderSortJobItem(list, getListItem);
     })
     .catch((error) => {
-      console.log("loading job item lastModifyTime end");
       console.log(error);
       list.forEach((item) => {
         const { itemId, lastModifyTime, brandName } = item;
@@ -139,6 +140,7 @@ function parseBossData(list, getListItem) {
         let tag = createDOM(lastModifyTime, brandName);
         dom.appendChild(tag);
       });
+      hiddenLoadingDOM();
     });
 }
 
@@ -152,4 +154,21 @@ function createDOM(lastModifyTime, brandName) {
   div.classList.add("__boss_time_tag");
   renderTimeTag(div, lastModifyTime, brandName);
   return div;
+}
+
+function createLoadingDOM(brandName) {
+  const div = document.createElement("div");
+  div.classList.add("__boss_time_tag");
+  div.classList.add("__loading_tag");
+  renderTimeLoadingTag(div, brandName);
+  return div;
+}
+
+function hiddenLoadingDOM() {
+  var loadingTagList = document.querySelectorAll(".__loading_tag");
+  if (loadingTagList) {
+    loadingTagList.forEach((item) => {
+      item.style = "visibility: hidden;";
+    });
+  }
 }
