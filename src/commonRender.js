@@ -3,15 +3,23 @@ import { isOutsource } from "./data/outsource";
 import { isTraining } from "./data/training";
 import { convertTimeToHumanReadable } from "./utils";
 
-export function renderTimeTag(divElement, lastModifyTime, brandName) {
+export function renderTimeTag(
+  divElement,
+  lastModifyTime,
+  brandName,
+  jobStatusDesc
+) {
   var timeHumanReadable;
-  var timeText;
+  var timeText = "";
+  if (jobStatusDesc) {
+    timeText += "【招聘状态:" + jobStatusDesc.label + "】";
+  }
   if (lastModifyTime) {
     timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
-    timeText = "【" + timeHumanReadable + "更新】";
+    timeText += "【" + timeHumanReadable + "更新】";
   } else {
     timeHumanReadable = "【" + "未找到更新时间" + "】";
-    timeText = timeHumanReadable;
+    timeText += timeHumanReadable;
   }
   var text = timeText;
   text += getCompanyInfoText(brandName);
@@ -105,6 +113,13 @@ export function renderSortJobItem(list, getListItem) {
           : o1.firstPublishTime
       ).valueOf()
     );
+  });
+  sortList.sort((o1, o2) => {
+    if (o2.jobStatusDesc && o1.jobStatusDesc) {
+      return o1.jobStatusDesc.order - o2.jobStatusDesc.order;
+    } else {
+      return 0;
+    }
   });
   sortList.forEach((item, index) => {
     idAndSortIndexMap.set(JSON.stringify(item), index);
