@@ -7,6 +7,11 @@ import {
 } from "../../commonRender";
 import { getRandomInt } from "../../utils";
 import onlineFilter from "./onlineFilter";
+import {
+  JOB_STATUS_DESC_NEWEST,
+  JOB_STATUS_DESC_RECRUITING,
+  JOB_STATUS_DESC_UNKNOW,
+} from "../../common";
 
 const DELAY_FETCH_TIME = 250; //ms
 const DELAY_FETCH_TIME_RANDOM_OFFSET = 50; //ms
@@ -59,6 +64,16 @@ function mutationContainer() {
   });
 }
 
+function convertJobStatusDesc(statusText) {
+  if (statusText == JOB_STATUS_DESC_NEWEST.key) {
+    return JOB_STATUS_DESC_NEWEST;
+  } else if (statusText == JOB_STATUS_DESC_RECRUITING.key) {
+    return JOB_STATUS_DESC_RECRUITING;
+  } else {
+    return JOB_STATUS_DESC_UNKNOW;
+  }
+}
+
 // 解析数据，插入时间标签
 function parseBossData(list, getListItem) {
   const urlList = [];
@@ -92,20 +107,25 @@ function parseBossData(list, getListItem) {
     promiseList.push(promise);
     if (index == urlList.length - 1) {
       const lastModifyTimeList = [];
+      const jobStatusDescList = [];
       Promise.allSettled(promiseList)
         .then((jsonList) => {
           jsonList.forEach((item) => {
             lastModifyTimeList.push(
               dayjs(item.value?.zpData?.brandComInfo?.activeTime)
             );
+            jobStatusDescList.push(
+              convertJobStatusDesc(item.value?.zpData?.jobInfo?.jobStatusDesc)
+            );
           });
           list.forEach((item, index) => {
             item["lastModifyTime"] = lastModifyTimeList[index];
+            item["jobStatusDesc"] = jobStatusDescList[index];
           });
           list.forEach((item) => {
-            const { itemId, lastModifyTime, brandName } = item;
+            const { itemId, lastModifyTime, brandName, jobStatusDesc } = item;
             const dom = getListItem(itemId);
-            let tag = createDOM(lastModifyTime, brandName);
+            let tag = createDOM(lastModifyTime, brandName, jobStatusDesc);
             dom.appendChild(tag);
           });
           hiddenLoadingDOM();
@@ -125,10 +145,10 @@ function parseBossData(list, getListItem) {
   });
 }
 
-function createDOM(lastModifyTime, brandName) {
+function createDOM(lastModifyTime, brandName, jobStatusDesc) {
   const div = document.createElement("div");
   div.classList.add("__boss_time_tag");
-  renderTimeTag(div, lastModifyTime, brandName);
+  renderTimeTag(div, lastModifyTime, brandName, jobStatusDesc);
   return div;
 }
 
