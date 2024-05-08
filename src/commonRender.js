@@ -13,34 +13,50 @@ export function renderTimeTag(divElement, lastModifyTime, brandName) {
     timeHumanReadable = "【" + "未找到更新时间" + "】";
     timeText = timeHumanReadable;
   }
-  var offsetTimeDay;
-  if (lastModifyTime) {
-    offsetTimeDay = dayjs().diff(dayjs(lastModifyTime), "day");
-  } else {
-    lastModifyTime = -1;
-  }
+  var text = timeText;
+  text += getCompanyInfoText(brandName);
+  divElement.style = getRenderTimeStyle(lastModifyTime);
+  divElement.innerHTML = text;
+}
+
+export function renderTimeLoadingTag(divElement, brandName) {
+  var timeText = "【正查找更新时间⌛︎】";
+  var text = timeText;
+  text += getCompanyInfoText(brandName);
+  divElement.style = getRenderTimeStyle();
+  divElement.innerHTML = text;
+}
+
+function getCompanyInfoText(brandName) {
+  var text = "";
   const isOutsourceBrand = isOutsource(brandName);
   const isTrainingBrand = isTraining(brandName);
-  var text = timeText;
-  var style =
-    "color:white;font-size:12px;background-color: " +
-    getTimeColorByoffsetTimeDay(offsetTimeDay) +
-    ";";
   if (isOutsourceBrand) {
     text += "【疑似外包公司】";
-    divElement.classList.add("__is_outsourcing_or_training");
   }
   if (isTrainingBrand) {
     text += "【疑似培训机构】";
-    divElement.classList.add("__is_outsourcing_or_training");
   }
   if (isOutsourceBrand || isTrainingBrand) {
     text += "⛅";
   } else {
     text += "☀";
   }
-  divElement.style = style;
-  divElement.innerHTML = text;
+  return text;
+}
+
+function getRenderTimeStyle(lastModifyTime) {
+  var offsetTimeDay;
+  if (lastModifyTime) {
+    offsetTimeDay = dayjs().diff(dayjs(lastModifyTime), "day");
+  } else {
+    lastModifyTime = -1;
+  }
+  return (
+    "color:white;font-size:12px;background-color: " +
+    getTimeColorByoffsetTimeDay(offsetTimeDay) +
+    ";"
+  );
 }
 
 function getTimeColorByoffsetTimeDay(offsetTimeDay) {
