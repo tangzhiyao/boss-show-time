@@ -5,7 +5,11 @@ import {
   renderSortJobItem,
   renderTimeLoadingTag,
 } from "../../commonRender";
+import { getRandomInt } from "../../utils";
 import onlineFilter from "./onlineFilter";
+
+const DELAY_FETCH_TIME = 250; //ms
+const DELAY_FETCH_TIME_RANDOM_OFFSET = 50; //ms
 
 export function getBossData(responseText) {
   try {
@@ -70,39 +74,55 @@ function parseBossData(list, getListItem) {
     dom.appendChild(loadingLastModifyTimeTag);
   });
   let promiseList = [];
-  urlList.forEach((url) => {
-    promiseList.push(fetch(url).then((resp) => resp.json()));
-  });
-  const lastModifyTimeList = [];
-  Promise.allSettled(promiseList)
-    .then((jsonList) => {
-      jsonList.forEach((item) => {
-        lastModifyTimeList.push(
-          dayjs(item.value?.zpData?.brandComInfo?.activeTime)
-        );
-      });
-      list.forEach((item, index) => {
-        item["lastModifyTime"] = lastModifyTimeList[index];
-      });
-      list.forEach((item) => {
-        const { itemId, lastModifyTime, brandName } = item;
-        const dom = getListItem(itemId);
-        let tag = createDOM(lastModifyTime, brandName);
-        dom.appendChild(tag);
-      });
-      hiddenLoadingDOM();
-      renderSortJobItem(list, getListItem);
-    })
-    .catch((error) => {
-      console.log(error);
-      list.forEach((item) => {
-        const { itemId, lastModifyTime, brandName } = item;
-        const dom = getListItem(itemId);
-        let tag = createDOM(lastModifyTime, brandName);
-        dom.appendChild(tag);
-      });
-      hiddenLoadingDOM();
+  urlList.forEach(async (url, index) => {
+    const delay = (
+      ms = DELAY_FETCH_TIME * index +
+        getRandomInt(DELAY_FETCH_TIME_RANDOM_OFFSET)
+    ) => new Promise((r) => setTimeout(r, ms));
+    await delay();
+    const promise = new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(url);
+        const result = await response.json();
+        resolve(result);
+      } catch (e) {
+        reject(e);
+      }
     });
+    promiseList.push(promise);
+    if (index == urlList.length - 1) {
+      const lastModifyTimeList = [];
+      Promise.allSettled(promiseList)
+        .then((jsonList) => {
+          jsonList.forEach((item) => {
+            lastModifyTimeList.push(
+              dayjs(item.value?.zpData?.brandComInfo?.activeTime)
+            );
+          });
+          list.forEach((item, index) => {
+            item["lastModifyTime"] = lastModifyTimeList[index];
+          });
+          list.forEach((item) => {
+            const { itemId, lastModifyTime, brandName } = item;
+            const dom = getListItem(itemId);
+            let tag = createDOM(lastModifyTime, brandName);
+            dom.appendChild(tag);
+          });
+          hiddenLoadingDOM();
+          renderSortJobItem(list, getListItem);
+        })
+        .catch((error) => {
+          console.log(error);
+          list.forEach((item) => {
+            const { itemId, lastModifyTime, brandName } = item;
+            const dom = getListItem(itemId);
+            let tag = createDOM(lastModifyTime, brandName);
+            dom.appendChild(tag);
+          });
+          hiddenLoadingDOM();
+        });
+    }
+  });
 }
 
 function createDOM(lastModifyTime, brandName) {
