@@ -10,21 +10,46 @@ export function renderTimeTag(
   jobStatusDesc
 ) {
   var timeHumanReadable;
-  var timeText = "";
+  var statusTag = null;
+  //jobStatusDesc
   if (jobStatusDesc) {
-    timeText += "【招聘状态:" + jobStatusDesc.label + "】";
+    statusTag = document.createElement("span");
+    statusTag.innerHTML = "【招聘状态:" + jobStatusDesc.label + "❔】";
+    statusTag.title = "最新：未知；招聘中：代表至少三天前发布的岗位";
+    divElement.appendChild(statusTag);
   }
-  if (lastModifyTime) {
-    timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
-    timeText += "【" + timeHumanReadable + "更新】";
+  //lastModifyTime
+  var lastModifyTimeTag = document.createElement("span");
+  if (jobStatusDesc) {
+    //for boss
+    if (lastModifyTime) {
+      timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
+      lastModifyTimeTag.innerHTML +=
+        "【岗位详情更新时间:" + timeHumanReadable + "❔】";
+      lastModifyTimeTag.title =
+        "招聘方登录后系统会自动修改岗位详情页的更新时间";
+    } else {
+      lastModifyTimeTag.innerHTML = "【" + "未找到更新时间" + "】";
+    }
   } else {
-    timeHumanReadable = "【" + "未找到更新时间" + "】";
-    timeText += timeHumanReadable;
+    if (lastModifyTime) {
+      timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
+      lastModifyTimeTag.innerHTML += "【" + timeHumanReadable + "更新】";
+    } else {
+      lastModifyTimeTag.innerHTML = "【" + "未找到更新时间" + "】";
+    }
   }
-  var text = timeText;
-  text += getCompanyInfoText(brandName);
+  divElement.appendChild(lastModifyTimeTag);
+  //companyInfo
+  var companyInfoTag = null;
+  var companyInfoText = getCompanyInfoText(brandName);
+  if (companyInfoText !== "") {
+    companyInfoTag = document.createElement("span");
+    companyInfoTag.innerHTML = companyInfoText;
+    divElement.appendChild(companyInfoTag);
+  }
+  //other
   divElement.style = getRenderTimeStyle(lastModifyTime);
-  divElement.innerHTML = text;
 }
 
 export function renderTimeLoadingTag(divElement, brandName) {
