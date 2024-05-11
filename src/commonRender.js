@@ -16,7 +16,7 @@ export function renderTimeTag(
     statusTag = document.createElement("span");
     statusTag.innerHTML = "【招聘状态:" + jobStatusDesc.label + "❔】";
     statusTag.title = "最新：未知；招聘中：代表至少三天前发布的岗位";
-    jobStatusDesc.classList.add("__time_tag_base_text_font");
+    statusTag.classList.add("__time_tag_base_text_font");
     divElement.appendChild(statusTag);
   }
   //lastModifyTime
