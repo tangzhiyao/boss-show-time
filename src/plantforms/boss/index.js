@@ -80,10 +80,8 @@ function parseBossData(list, getListItem) {
   list.forEach((item) => {
     const { itemId, brandName, securityId } = item;
     const dom = getListItem(itemId);
-    const jobItemDetailUrl = dom.childNodes[0].childNodes[0].href;
-    const url = new URL(jobItemDetailUrl);
     var pureJobItemDetailUrl =
-      url.origin + "/wapi/zpgeek/job/detail.json?securityId=" + securityId;
+      "https://www.zhipin.com/wapi/zpgeek/job/detail.json?securityId=" + securityId;
     urlList.push(pureJobItemDetailUrl);
     let loadingLastModifyTimeTag = createLoadingDOM(brandName);
     dom.appendChild(loadingLastModifyTimeTag);
