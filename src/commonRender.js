@@ -111,12 +111,13 @@ function getTimeColorByoffsetTimeDay(offsetTimeDay) {
 }
 
 export function setupSortJobItem(node) {
-  node.style = "display:flex;flex-direction: column;";
-  //for zhilian
-  const paginationNode = node.querySelector(".pagination");
-  if (paginationNode) {
-    paginationNode.style = "order:99999;";
-  }
+    if(!node) return;
+    node.style = "display:flex;flex-direction: column;";
+    //for zhilian
+    const paginationNode = node.querySelector(".pagination");
+    if (paginationNode) {
+        paginationNode.style = "order:99999;";
+    }
 }
 
 export function renderSortJobItem(list, getListItem) {

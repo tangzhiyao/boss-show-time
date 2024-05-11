@@ -16,7 +16,7 @@
       let ajaxEvent = new CustomEvent(event, { detail: this });
       window.dispatchEvent(ajaxEvent);
     }
-      
+    
     let oldXHR = window.XMLHttpRequest;
     if(!oldXHR) return console.error('不支持 XMLHttpRequest！ 请更换最新的 chrome 浏览器')
      
@@ -30,7 +30,7 @@
       realXHR.addEventListener('progress', function () { ajaxEventTrigger.call(this, 'ajaxProgress'); }, false);
       realXHR.addEventListener('timeout', function () { ajaxEventTrigger.call(this, 'ajaxTimeout'); }, false);
       realXHR.addEventListener('loadend', function () { ajaxEventTrigger.call(this, 'ajaxLoadEnd'); }, false);
-      realXHR.addEventListener('readystatechange', function(e) { ajaxEventTrigger.call(this, 'ajaxReadyStateChange'); }, false);
+      realXHR.addEventListener('readystatechange', function() { ajaxEventTrigger.call(this, 'ajaxReadyStateChange'); }, false);
   
       let send = realXHR.send;
       realXHR.send = function(...arg){
@@ -56,7 +56,7 @@
       }
       return realXHR;
     }
-     
+    newXHR.prototype = oldXHR.prototype;
     window.XMLHttpRequest = newXHR;
   })();
 
@@ -85,6 +85,9 @@
     let event = new CustomEvent('proxyScriptLoaded', { detail: {
         zhipin: {
            initialState: window.__INITIAL_STATE__
+        },
+        lagou: {
+            initialState: window.__NEXT_DATA__
         }
     } });
     window.dispatchEvent(event);
