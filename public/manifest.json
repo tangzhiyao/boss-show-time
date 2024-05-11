@@ -15,7 +15,8 @@
             "matches": [
                 "https://www.zhipin.com/*",
                 "https://sou.zhaopin.com/*",
-                "https://we.51job.com/*"
+                "https://we.51job.com/*",
+                "https://www.lagou.com/*"
             ]
         }
     ],
@@ -25,13 +26,8 @@
             "matches": [
                 "https://www.zhipin.com/*", 
                 "https://sou.zhaopin.com/*",
-                "https://we.51job.com/*"
-            ]
-        },
-        {
-            "resources": ["zhilianFirstOpen.js"],
-            "matches": [
-                "https://sou.zhaopin.com/*"
+                "https://we.51job.com/*",
+                "https://www.lagou.com/*"
             ]
         }
     ],
@@ -41,6 +37,7 @@
     "host_permissions": [
         "https://www.zhipin.com/*",
         "https://sou.zhaopin.com/*",
-        "https://we.51job.com/*"
+        "https://we.51job.com/*",
+        "https://www.lagou.com/*"
     ]
 }
