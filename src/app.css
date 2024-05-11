@@ -49,3 +49,9 @@
 .__rencent_update {
     color: red;
 }
+
+.__time_tag_base_text_font{
+    color:white;
+    font-size:12px;
+    line-height: 18px;
+}

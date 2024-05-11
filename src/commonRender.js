@@ -16,6 +16,7 @@ export function renderTimeTag(
     statusTag = document.createElement("span");
     statusTag.innerHTML = "【招聘状态:" + jobStatusDesc.label + "❔】";
     statusTag.title = "最新：未知；招聘中：代表至少三天前发布的岗位";
+    jobStatusDesc.classList.add("__time_tag_base_text_font");
     divElement.appendChild(statusTag);
   }
   //lastModifyTime
@@ -39,6 +40,7 @@ export function renderTimeTag(
       lastModifyTimeTag.innerHTML = "【" + "未找到更新时间" + "】";
     }
   }
+  lastModifyTimeTag.classList.add("__time_tag_base_text_font");
   divElement.appendChild(lastModifyTimeTag);
   //companyInfo
   var companyInfoTag = null;
@@ -46,10 +48,12 @@ export function renderTimeTag(
   if (companyInfoText !== "") {
     companyInfoTag = document.createElement("span");
     companyInfoTag.innerHTML = companyInfoText;
+    companyInfoTag.classList.add("__time_tag_base_text_font");
     divElement.appendChild(companyInfoTag);
   }
   //other
   divElement.style = getRenderTimeStyle(lastModifyTime);
+  divElement.classList.add("__time_tag_base_text_font");
 }
 
 export function renderTimeLoadingTag(divElement, brandName) {
@@ -57,6 +61,7 @@ export function renderTimeLoadingTag(divElement, brandName) {
   var text = timeText;
   text += getCompanyInfoText(brandName);
   divElement.style = getRenderTimeStyle();
+  divElement.classList.add("__time_tag_base_text_font");
   divElement.innerHTML = text;
 }
 
@@ -86,9 +91,7 @@ function getRenderTimeStyle(lastModifyTime) {
     lastModifyTime = -1;
   }
   return (
-    "color:white;font-size:12px;background-color: " +
-    getTimeColorByoffsetTimeDay(offsetTimeDay) +
-    ";"
+    "background-color: " + getTimeColorByoffsetTimeDay(offsetTimeDay) + ";"
   );
 }
 
@@ -111,13 +114,13 @@ function getTimeColorByoffsetTimeDay(offsetTimeDay) {
 }
 
 export function setupSortJobItem(node) {
-    if(!node) return;
-    node.style = "display:flex;flex-direction: column;";
-    //for zhilian
-    const paginationNode = node.querySelector(".pagination");
-    if (paginationNode) {
-        paginationNode.style = "order:99999;";
-    }
+  if (!node) return;
+  node.style = "display:flex;flex-direction: column;";
+  //for zhilian
+  const paginationNode = node.querySelector(".pagination");
+  if (paginationNode) {
+    paginationNode.style = "order:99999;";
+  }
 }
 
 export function renderSortJobItem(list, getListItem) {
