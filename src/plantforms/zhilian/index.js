@@ -50,7 +50,7 @@ function parseZhiPinData(list, getListItem) {
         let tag = createDOM(firstPublishTime, companyName); 
         dom.appendChild(tag);
     });
-    renderSortJobItem(list, getListItem);
+    renderSortJobItem(list, getListItem, 'firstPublishTime');
 }
 
 export function createDOM(lastModifyTime,brandName) {

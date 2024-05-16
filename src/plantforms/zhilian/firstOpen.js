@@ -22,5 +22,5 @@ export default function firstOpen(data) {
     });
     renderSortJobItem(positionList,(index)=>{
         return children?.[index];
-    })
+    }, 'firstPublishTime')
 }

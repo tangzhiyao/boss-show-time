@@ -21,8 +21,8 @@ export default function firstOpen(data) {
                 let tag = createDOM(createTime, companyShortName); 
                 dom.appendChild(tag);
             });
-            renderSortJobItem(list,(index)=>{
+            renderSortJobItem(list, (index)=>{
                 return children?.[index];
-            })
+            }, 'createTime')
     });
 }

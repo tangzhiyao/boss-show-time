@@ -13,34 +13,50 @@ export function renderTimeTag(divElement, lastModifyTime, brandName) {
     timeHumanReadable = "【" + "未找到更新时间" + "】";
     timeText = timeHumanReadable;
   }
-  var offsetTimeDay;
-  if (lastModifyTime) {
-    offsetTimeDay = dayjs().diff(dayjs(lastModifyTime), "day");
-  } else {
-    lastModifyTime = -1;
-  }
+  var text = timeText;
+  text += getCompanyInfoText(brandName);
+  divElement.style = getRenderTimeStyle(lastModifyTime);
+  divElement.innerHTML = text;
+}
+
+export function renderTimeLoadingTag(divElement, brandName) {
+  var timeText = "【正查找更新时间⌛︎】";
+  var text = timeText;
+  text += getCompanyInfoText(brandName);
+  divElement.style = getRenderTimeStyle();
+  divElement.innerHTML = text;
+}
+
+function getCompanyInfoText(brandName) {
+  var text = "";
   const isOutsourceBrand = isOutsource(brandName);
   const isTrainingBrand = isTraining(brandName);
-  var text = timeText;
-  var style =
-    "color:white;font-size:12px;background-color: " +
-    getTimeColorByoffsetTimeDay(offsetTimeDay) +
-    ";";
   if (isOutsourceBrand) {
     text += "【疑似外包公司】";
-    divElement.classList.add("__is_outsourcing_or_training");
   }
   if (isTrainingBrand) {
     text += "【疑似培训机构】";
-    divElement.classList.add("__is_outsourcing_or_training");
   }
   if (isOutsourceBrand || isTrainingBrand) {
     text += "⛅";
   } else {
     text += "☀";
   }
-  divElement.style = style;
-  divElement.innerHTML = text;
+  return text;
+}
+
+function getRenderTimeStyle(lastModifyTime) {
+  var offsetTimeDay;
+  if (lastModifyTime) {
+    offsetTimeDay = dayjs().diff(dayjs(lastModifyTime), "day");
+  } else {
+    lastModifyTime = -1;
+  }
+  return (
+    "color:white;font-size:12px;background-color: " +
+    getTimeColorByoffsetTimeDay(offsetTimeDay) +
+    ";"
+  );
 }
 
 function getTimeColorByoffsetTimeDay(offsetTimeDay) {
@@ -71,26 +87,16 @@ export function setupSortJobItem(node) {
     }
 }
 
-export function renderSortJobItem(list, getListItem) {
+export function renderSortJobItem(list, getListItem, timeKey) {
   const idAndSortIndexMap = new Map();
   const sortList = JSON.parse(JSON.stringify(list)).sort((o1, o2) => {
-    return (
-      dayjs(
-        o2.lastModifyTime
-          ? o2.lastModifyTime
-          : o2.updateDateTime
-          ? o2.updateDateTime
-          : o2.firstPublishTime
-      ).valueOf() -
-      dayjs(
-        o1.lastModifyTime
-          ? o1.lastModifyTime
-          : o1.updateDateTime
-          ? o1.updateDateTime
-          : o1.firstPublishTime
-      ).valueOf()
-    );
+    const minDate = dayjs('2000-01-01');
+    // 如果时间不存在给一个默认最小值，主要为了 boss直聘 没有时间的情况
+    const o1time = o1[timeKey] ? dayjs(o1[timeKey]) : minDate;
+    const o2time = o2[timeKey] ? dayjs(o2[timeKey]) : minDate;
+    return o2time.valueOf() - o1time.valueOf();
   });
+
   sortList.forEach((item, index) => {
     idAndSortIndexMap.set(JSON.stringify(item), index);
   });
