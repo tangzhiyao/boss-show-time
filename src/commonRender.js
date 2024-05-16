@@ -8,9 +8,9 @@ export function renderTimeTag(
   divElement,
   lastModifyTime,
   brandName,
-  {jobStatusDesc,jobDesc}
+  { jobStatusDesc, jobDesc }
 ) {
-  if(jobDesc){
+  if (jobDesc) {
     divElement.title = jobDesc;
   }
   var timeHumanReadable;
@@ -147,6 +147,8 @@ export function renderSortJobItem(list, getListItem) {
           : o2.updateDateTime
           ? o2.updateDateTime
           : o2.firstPublishTime
+          ? o2.firstPublishTime
+          : o2.createTime
       ).valueOf() -
       dayjs(
         o1.lastModifyTime
@@ -154,6 +156,8 @@ export function renderSortJobItem(list, getListItem) {
           : o1.updateDateTime
           ? o1.updateDateTime
           : o1.firstPublishTime
+          ? o1.firstPublishTime
+          : o1.createTime
       ).valueOf()
     );
   });
