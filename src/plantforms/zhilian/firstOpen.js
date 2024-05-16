@@ -13,11 +13,12 @@ export default function firstOpen(data) {
         const {
             firstPublishTime,
             companyName,
+            jobSummary
         }  = item;
         const dom = children?.[index];
         if(!dom) return;
         
-        let tag = createDOM(firstPublishTime, companyName); 
+        let tag = createDOM(firstPublishTime, companyName,jobSummary); 
         dom.appendChild(tag);
     });
     renderSortJobItem(positionList,(index)=>{

@@ -13,7 +13,6 @@ export function getListValue(data = {}) {
 export function getLaGouData(responseText) {
     try {
         const data = JSON.parse(responseText);
-        console.log('tzy data', data)
         mutationContainer().then((node) => {
             setupSortJobItem(node); // 添加 flex 样式，以便后续用 order 进行排序
             parseLaGouData(getListValue(data) || [], getListByNode(node));
@@ -54,23 +53,22 @@ export function mutationContainer () {
 
 // 解析数据，插入时间标签
 function parseLaGouData(list, getListItem) {
-    console.log('tzy data', list, getListItem(1) )
-
     list.forEach((item, index) => {
         const {
             createTime,
             companyShortName,
+            positionDetail
         }  = item;
         const dom = getListItem(index);
-        let tag = createDOM(createTime, companyShortName); 
+        let tag = createDOM(createTime, companyShortName,positionDetail); 
         dom.appendChild(tag);
     });
     renderSortJobItem(list, getListItem);
 }
 
-export function createDOM(lastModifyTime,brandName) {
+export function createDOM(lastModifyTime,brandName,positionDetail) {
     const div = document.createElement('div');
     div.classList.add('__zhipin_time_tag');
-    renderTimeTag(div,lastModifyTime,brandName);
+    renderTimeTag(div,lastModifyTime,brandName,{jobDesc:positionDetail?.replaceAll("<br />","")});
     return div;
 }

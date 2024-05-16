@@ -81,7 +81,8 @@ function parseBossData(list, getListItem) {
     const { itemId, brandName, securityId } = item;
     const dom = getListItem(itemId);
     var pureJobItemDetailUrl =
-      "https://www.zhipin.com/wapi/zpgeek/job/detail.json?securityId=" + securityId;
+      "https://www.zhipin.com/wapi/zpgeek/job/detail.json?securityId=" +
+      securityId;
     urlList.push(pureJobItemDetailUrl);
     let loadingLastModifyTimeTag = createLoadingDOM(brandName);
     dom.appendChild(loadingLastModifyTimeTag);
@@ -106,6 +107,7 @@ function parseBossData(list, getListItem) {
     if (index == urlList.length - 1) {
       const lastModifyTimeList = [];
       const jobStatusDescList = [];
+      const jobDesc = [];
       Promise.allSettled(promiseList)
         .then((jsonList) => {
           jsonList.forEach((item) => {
@@ -115,15 +117,28 @@ function parseBossData(list, getListItem) {
             jobStatusDescList.push(
               convertJobStatusDesc(item.value?.zpData?.jobInfo?.jobStatusDesc)
             );
+            jobDesc.push(item.value?.zpData?.jobInfo?.postDescription);
           });
           list.forEach((item, index) => {
             item["lastModifyTime"] = lastModifyTimeList[index];
             item["jobStatusDesc"] = jobStatusDescList[index];
+            item["postDescription"] = jobDesc[index];
           });
           list.forEach((item) => {
-            const { itemId, lastModifyTime, brandName, jobStatusDesc } = item;
+            const {
+              itemId,
+              lastModifyTime,
+              brandName,
+              jobStatusDesc,
+              postDescription,
+            } = item;
             const dom = getListItem(itemId);
-            let tag = createDOM(lastModifyTime, brandName, jobStatusDesc);
+            let tag = createDOM(
+              lastModifyTime,
+              brandName,
+              jobStatusDesc,
+              postDescription
+            );
             dom.appendChild(tag);
           });
           hiddenLoadingDOM();
@@ -143,10 +158,13 @@ function parseBossData(list, getListItem) {
   });
 }
 
-function createDOM(lastModifyTime, brandName, jobStatusDesc) {
+function createDOM(lastModifyTime, brandName, jobStatusDesc, postDescription) {
   const div = document.createElement("div");
   div.classList.add("__boss_time_tag");
-  renderTimeTag(div, lastModifyTime, brandName, jobStatusDesc);
+  renderTimeTag(div, lastModifyTime, brandName, {
+    jobStatusDesc: jobStatusDesc,
+    jobDesc: postDescription,
+  });
   return div;
 }
 

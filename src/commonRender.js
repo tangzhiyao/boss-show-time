@@ -8,8 +8,11 @@ export function renderTimeTag(
   divElement,
   lastModifyTime,
   brandName,
-  jobStatusDesc
+  {jobStatusDesc,jobDesc}
 ) {
+  if(jobDesc){
+    divElement.title = jobDesc;
+  }
   var timeHumanReadable;
   var statusTag = null;
   //jobStatusDesc
