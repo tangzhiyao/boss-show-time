@@ -13,7 +13,7 @@ import {
   JOB_STATUS_DESC_UNKNOW,
 } from "../../common";
 
-const DELAY_FETCH_TIME = 250; //ms
+const DELAY_FETCH_TIME = 75; //ms
 const DELAY_FETCH_TIME_RANDOM_OFFSET = 50; //ms
 
 export function getBossData(responseText) {
