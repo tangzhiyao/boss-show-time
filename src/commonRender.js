@@ -37,7 +37,7 @@ export function renderTimeTag(
     //for boss
     if (lastModifyTime) {
       timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
-      lastModifyTimeTag.innerHTML += "【详情更新:" + timeHumanReadable + "❔】";
+      lastModifyTimeTag.innerHTML += "【" + timeHumanReadable + "更新详情❔】";
       lastModifyTimeTag.title =
         "招聘方登录后系统会自动修改岗位详情页的更新时间";
     } else {
