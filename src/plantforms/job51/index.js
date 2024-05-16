@@ -45,17 +45,30 @@ function mutationContainer() {
 // 解析数据，插入时间标签
 function parseData(list, getListItem) {
   list.forEach((item, index) => {
-    const { updateDateTime, companyName, jobDescribe } = item;
+    const { updateDateTime, companyName, jobDescribe, confirmDateString } = item;
     const dom = getListItem(index);
-    let tag = createDOM(updateDateTime, companyName, jobDescribe);
+    let tag = createDOM(
+      updateDateTime,
+      companyName,
+      jobDescribe,
+      confirmDateString
+    );
     dom.appendChild(tag);
   });
   renderSortJobItem(list, getListItem);
 }
 
-export function createDOM(lastModifyTime, brandName, jobDescribe) {
+export function createDOM(
+  lastModifyTime,
+  brandName,
+  jobDescribe,
+  confirmDateString
+) {
   const div = document.createElement("div");
   div.classList.add("__job51_time_tag");
-  renderTimeTag(div, lastModifyTime, brandName,{ jobDesc: jobDescribe });
+  renderTimeTag(div, lastModifyTime, brandName, {
+    jobDesc: jobDescribe,
+    firstPublishTime: confirmDateString,
+  });
   return div;
 }

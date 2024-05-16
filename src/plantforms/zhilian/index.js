@@ -45,17 +45,25 @@ function mutationContainer() {
 // 解析数据，插入时间标签
 function parseZhiPinData(list, getListItem) {
   list.forEach((item, index) => {
-    const { firstPublishTime, companyName, jobSummary } = item;
+    const { publishTime, companyName, jobSummary, firstPublishTime } = item;
     const dom = getListItem(index);
-    let tag = createDOM(firstPublishTime, companyName, jobSummary);
+    let tag = createDOM(publishTime, companyName, jobSummary, firstPublishTime);
     dom.appendChild(tag);
   });
   renderSortJobItem(list, getListItem);
 }
 
-export function createDOM(lastModifyTime, brandName, jobSummary) {
+export function createDOM(
+  lastModifyTime,
+  brandName,
+  jobSummary,
+  firstPublishTime
+) {
   const div = document.createElement("div");
   div.classList.add("__zhipin_time_tag");
-  renderTimeTag(div, lastModifyTime, brandName, { jobDesc: jobSummary });
+  renderTimeTag(div, lastModifyTime, brandName, {
+    jobDesc: jobSummary,
+    firstPublishTime: firstPublishTime,
+  });
   return div;
 }

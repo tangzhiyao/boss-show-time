@@ -8,12 +8,11 @@ export function renderTimeTag(
   divElement,
   lastModifyTime,
   brandName,
-  { jobStatusDesc, jobDesc }
+  { jobStatusDesc, jobDesc, firstPublishTime }
 ) {
   if (jobDesc) {
     divElement.title = jobDesc;
   }
-  var timeHumanReadable;
   var statusTag = null;
   //jobStatusDesc
   if (jobStatusDesc) {
@@ -34,13 +33,26 @@ export function renderTimeTag(
     statusTag.classList.add("__time_tag_base_text_font");
     divElement.appendChild(statusTag);
   }
+  //firstPublishTime
+  if (firstPublishTime) {
+    var firstPublishTimeTag = document.createElement("span");
+    var firstPublishTimeHumanReadable;
+    firstPublishTimeHumanReadable = convertTimeToHumanReadable(
+      firstPublishTime
+    );
+    firstPublishTimeTag.innerHTML +=
+      "【" + firstPublishTimeHumanReadable + "发布】";
+    firstPublishTimeTag.classList.add("__time_tag_base_text_font");
+    divElement.appendChild(firstPublishTimeTag);
+  }
   //lastModifyTime
   var lastModifyTimeTag = document.createElement("span");
   if (jobStatusDesc) {
+    var timeHumanReadable;
     //for boss
     if (lastModifyTime) {
       timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
-      lastModifyTimeTag.innerHTML += "【" + timeHumanReadable + "更新详情❔】";
+      lastModifyTimeTag.innerHTML += "【" + timeHumanReadable + "更新❔】";
       lastModifyTimeTag.title =
         "招聘方登录后系统会自动修改岗位详情页的更新时间";
     } else {
@@ -66,12 +78,12 @@ export function renderTimeTag(
     divElement.appendChild(companyInfoTag);
   }
   //other
-  divElement.style = getRenderTimeStyle(lastModifyTime);
+  divElement.style = getRenderTimeStyle(firstPublishTime ?? lastModifyTime);
   divElement.classList.add("__time_tag_base_text_font");
 }
 
 export function renderTimeLoadingTag(divElement, brandName) {
-  var timeText = "【正查找更新时间⌛︎】";
+  var timeText = "【正查找发布和更新时间⌛︎】";
   var text = timeText;
   text += getCompanyInfoText(brandName);
   divElement.style = getRenderTimeStyle();
@@ -139,25 +151,33 @@ export function setupSortJobItem(node) {
 
 export function renderSortJobItem(list, getListItem) {
   const idAndSortIndexMap = new Map();
+  //sort updatetime
   const sortList = JSON.parse(JSON.stringify(list)).sort((o1, o2) => {
     return (
       dayjs(
-        o2.lastModifyTime
-          ? o2.lastModifyTime
-          : o2.updateDateTime
-          ? o2.updateDateTime
-          : o2.firstPublishTime
-          ? o2.firstPublishTime
-          : o2.createTime
+        o2.lastModifyTime ??
+          o2.lastModifyTime ??
+          o2.updateDateTime ??
+          o2.publishTime ??
+          null
       ).valueOf() -
       dayjs(
-        o1.lastModifyTime
-          ? o1.lastModifyTime
-          : o1.updateDateTime
-          ? o1.updateDateTime
-          : o1.firstPublishTime
-          ? o1.firstPublishTime
-          : o1.createTime
+        o1.lastModifyTime ??
+          o1.lastModifyTime ??
+          o1.updateDateTime ??
+          o1.publishTime ??
+          null
+      ).valueOf()
+    );
+  });
+  //sort firstPublishTime
+  sortList.sort((o1, o2) => {
+    return (
+      dayjs(
+        o2.confirmDateString ?? o2.firstPublishTime ?? o2.createTime ?? null
+      ).valueOf() -
+      dayjs(
+        o1.confirmDateString ?? o1.firstPublishTime ?? o1.createTime ?? null
       ).valueOf()
     );
   });

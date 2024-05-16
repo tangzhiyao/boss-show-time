@@ -1,27 +1,23 @@
-import { setupSortJobItem,renderSortJobItem } from "../../commonRender";
-import { createDOM } from './index';
+import { setupSortJobItem, renderSortJobItem } from "../../commonRender";
+import { createDOM } from "./index";
 
 // 智联招聘首次打开页面时是服务端渲染，没法监听接口，但是 html 中保存了列表数据
 export default function firstOpen(data) {
-    const dom = document.querySelector('.positionlist');
-    setupSortJobItem(dom);
-    const children = dom?.children;
-    const { positionList = [] } = data;
-    if(!children || !positionList || positionList.lenth === 0) return;
+  const dom = document.querySelector(".positionlist");
+  setupSortJobItem(dom);
+  const children = dom?.children;
+  const { positionList = [] } = data;
+  if (!children || !positionList || positionList.lenth === 0) return;
 
-    positionList.forEach((item, index) => {
-        const {
-            firstPublishTime,
-            companyName,
-            jobSummary
-        }  = item;
-        const dom = children?.[index];
-        if(!dom) return;
-        
-        let tag = createDOM(firstPublishTime, companyName,jobSummary); 
-        dom.appendChild(tag);
-    });
-    renderSortJobItem(positionList,(index)=>{
-        return children?.[index];
-    })
+  positionList.forEach((item, index) => {
+    const { publishTime, companyName, jobSummary, firstPublishTime } = item;
+    const dom = children?.[index];
+    if (!dom) return;
+
+    let tag = createDOM(publishTime, companyName, jobSummary, firstPublishTime);
+    dom.appendChild(tag);
+  });
+  renderSortJobItem(positionList, (index) => {
+    return children?.[index];
+  });
 }
