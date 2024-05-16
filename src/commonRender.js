@@ -2,6 +2,7 @@ import dayjs from "dayjs";
 import { isOutsource } from "./data/outsource";
 import { isTraining } from "./data/training";
 import { convertTimeToHumanReadable } from "./utils";
+import { JOB_STATUS_DESC_NEWEST, JOB_STATUS_DESC_RECRUITING } from "./common";
 
 export function renderTimeTag(
   divElement,
@@ -14,8 +15,19 @@ export function renderTimeTag(
   //jobStatusDesc
   if (jobStatusDesc) {
     statusTag = document.createElement("span");
-    statusTag.innerHTML = "【招聘状态:" + jobStatusDesc.label + "❔】";
-    statusTag.title = "最新：未知；招聘中：代表至少三天前发布的岗位";
+    var statusToTimeText = "";
+    if (jobStatusDesc == JOB_STATUS_DESC_NEWEST) {
+      statusToTimeText = "一周内";
+    } else if (jobStatusDesc == JOB_STATUS_DESC_RECRUITING) {
+      statusToTimeText = "超出一周";
+    } else {
+      statusToTimeText = "未知时间";
+    }
+    statusTag.innerHTML = "【 " + statusToTimeText + "发布❔】";
+    statusTag.title =
+      "当前招聘状态【" +
+      jobStatusDesc.label +
+      "】，招聘状态：最新：代表一周内发布；招聘中：代表发布时间超过一周";
     statusTag.classList.add("__time_tag_base_text_font");
     divElement.appendChild(statusTag);
   }
@@ -25,8 +37,7 @@ export function renderTimeTag(
     //for boss
     if (lastModifyTime) {
       timeHumanReadable = convertTimeToHumanReadable(lastModifyTime);
-      lastModifyTimeTag.innerHTML +=
-        "【岗位详情更新时间:" + timeHumanReadable + "❔】";
+      lastModifyTimeTag.innerHTML += "【详情更新:" + timeHumanReadable + "❔】";
       lastModifyTimeTag.title =
         "招聘方登录后系统会自动修改岗位详情页的更新时间";
     } else {
