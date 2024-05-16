@@ -25,7 +25,7 @@ function getListByNode(node) {
 function mutationContainer () {
    return new Promise((resolve, reject) => {
         const dom = document.querySelector('.joblist');
-        const observer = new MutationObserver(function(childList, obs) {
+        const observer = new MutationObserver(function(childList) {
             const isAdd = (childList || []).some(item => {
                return item?.addedNodes?.length > 0
             });
@@ -50,12 +50,12 @@ function parseData(list, getListItem) {
         let tag = createDOM(updateDateTime, companyName); 
         dom.appendChild(tag);
     });
-    renderSortJobItem(list, getListItem);
+    renderSortJobItem(list, getListItem, 'updateDateTime');
 }
 
 export function createDOM(lastModifyTime,brandName) {
     const div = document.createElement('div');
     div.classList.add('__job51_time_tag');
-    renderTimeTag(div,lastModifyTime,brandName);
+    renderTimeTag(div,lastModifyTime, brandName);
     return div;
 }

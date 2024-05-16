@@ -53,6 +53,11 @@ export function convertTimeToHumanReadable(dateTime) {
     }
 
 }
+
+// 写一个 sleep 函数
+export function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}   
  
 export function debounce(fn, delay) {
     let timer = null;
@@ -65,3 +70,8 @@ export function debounce(fn, delay) {
         }, delay);
     }
 }
+
+export function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
+

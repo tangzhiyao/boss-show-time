@@ -13,7 +13,6 @@ export function getListValue(data = {}) {
 export function getLaGouData(responseText) {
     try {
         const data = JSON.parse(responseText);
-        console.log('tzy data', data)
         mutationContainer().then((node) => {
             setupSortJobItem(node); // 添加 flex 样式，以便后续用 order 进行排序
             parseLaGouData(getListValue(data) || [], getListByNode(node));
@@ -54,7 +53,6 @@ export function mutationContainer () {
 
 // 解析数据，插入时间标签
 function parseLaGouData(list, getListItem) {
-    console.log('tzy data', list, getListItem(1) )
 
     list.forEach((item, index) => {
         const {
@@ -65,7 +63,7 @@ function parseLaGouData(list, getListItem) {
         let tag = createDOM(createTime, companyShortName); 
         dom.appendChild(tag);
     });
-    renderSortJobItem(list, getListItem);
+    renderSortJobItem(list, getListItem, 'createTime');
 }
 
 export function createDOM(lastModifyTime,brandName) {
