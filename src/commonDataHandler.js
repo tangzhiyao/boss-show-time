@@ -5,7 +5,7 @@ import {
   PLATFORM_LAGOU,
   PLATFORM_ZHILIAN,
 } from './common';
-import { Job } from './domain/Job';
+import { Job } from './domain/job';
 import { JobApi } from './api';
 import { infoLog } from './log';
 

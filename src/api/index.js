@@ -1,4 +1,4 @@
-import { Job } from "../domain/Job";
+import { Job } from "../domain/job";
 import { JobDTO } from "../dto/jobDTO";
 import { invoke } from "./bridge";
 

@@ -1,11 +1,11 @@
 import { infoLog, debugLog } from '../log';
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import { Job } from '../domain/Job';
+import { Job } from '../domain/job';
 import { Message } from '../api/bridge';
 import dayjs from 'dayjs';
 import { JobDTO } from '../dto/jobDTO';
 import { toHump } from '../utils';
-import { ChangeLogV1 } from './changeLog/ChangeLogV1';
+import { ChangeLogV1 } from './changeLog/changeLogV1';
 import { initChangeLog, getChangeLogList } from './changeLog';
 debugLog('worker ready');
 
