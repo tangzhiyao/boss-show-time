@@ -9,6 +9,13 @@
         "48": "icons/icon.jpg",
         "128": "icons/icon.jpg"
     },
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+      },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'"
+    },
     "content_scripts": [
         {
             "js": ["app.js"],
@@ -32,7 +39,8 @@
         }
     ],
     "permissions": [
-        "webRequest"
+        "webRequest",
+        "offscreen"
     ],
     "host_permissions": [
         "https://www.zhipin.com/*",

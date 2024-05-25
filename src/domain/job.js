@@ -1,0 +1,23 @@
+export class Job{
+    jobId;
+    jobPlatform;
+    jobUrl;
+    jobName;
+    jobCompanyName;
+    jobLocationName;
+    jobAddress;
+    jobLongitude;
+    jobLatitude;
+    jobDescription;
+    jobDegreeName;
+    jobYear;
+    jobSalaryMin;
+    jobSalaryMax;
+    jobSalaryTotalMonth;
+    bossName;
+    bossCompanyName;
+    bossPosition;
+    dataSource;
+    createDatetime;
+    updateDatetime
+}

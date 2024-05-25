@@ -18,7 +18,9 @@
     "size-plugin": "^2.0.2",
     "webpack": "^5.91.0",
     "webpack-cli": "^4.10.0",
-    "webpack-merge": "^5.10.0"
+    "webpack-merge": "^5.10.0",
+    "@sqlite.org/sqlite-wasm": "3.43.2-build1",
+    "@types/chrome": "^0.0.246"
   },
   "dependencies": {
     "ajax-hooks": "^1.8.0",

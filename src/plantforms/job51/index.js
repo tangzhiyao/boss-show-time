@@ -1,7 +1,12 @@
+import { PLATFORM_51JOB } from "../../common";
+import { saveBrowseJob,getJobIds } from "../../commonDataHandler";
+import { JobApi} from "../../api"
 import {
   renderTimeTag,
   setupSortJobItem,
   renderSortJobItem,
+  createLoadingDOM,
+  hiddenLoadingDOM,
 } from "../../commonRender";
 
 export function getJob51Data(responseText) {
@@ -43,18 +48,32 @@ function mutationContainer() {
 }
 
 // 解析数据，插入时间标签
-function parseData(list, getListItem) {
+async function parseData(list, getListItem) {
+  list.forEach((item, index) => {
+    const dom = getListItem(index);
+    const { companyName } = item;
+    let loadingLastModifyTimeTag = createLoadingDOM(
+      companyName,
+      '__job51_time_tag'
+    );
+    dom.appendChild(loadingLastModifyTimeTag);
+  });
+  await saveBrowseJob(list,PLATFORM_51JOB);
+  var jobDTOList = await JobApi.getJobBrowseInfoByIds(getJobIds(list,PLATFORM_51JOB));
   list.forEach((item, index) => {
     const { updateDateTime, companyName, jobDescribe, confirmDateString } = item;
     const dom = getListItem(index);
+    item["firstBrowseDatetime"] = jobDTOList[index].createDatetime;
     let tag = createDOM(
       updateDateTime,
       companyName,
       jobDescribe,
-      confirmDateString
+      confirmDateString,
+      jobDTOList[index]
     );
     dom.appendChild(tag);
   });
+  hiddenLoadingDOM();
   renderSortJobItem(list, getListItem);
 }
 
@@ -62,13 +81,15 @@ export function createDOM(
   lastModifyTime,
   brandName,
   jobDescribe,
-  confirmDateString
+  confirmDateString,
+  jobDTO
 ) {
   const div = document.createElement("div");
   div.classList.add("__job51_time_tag");
   renderTimeTag(div, lastModifyTime, brandName, {
     jobDesc: jobDescribe,
     firstPublishTime: confirmDateString,
+    jobDTO:jobDTO
   });
   return div;
 }

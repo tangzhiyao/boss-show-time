@@ -9,9 +9,10 @@ const PATHS = require('./paths');
 const config = merge(common, {
   entry: {
     app: PATHS.src + '/app.js',
-    // background: PATHS.src + '/background.js',
+    background: PATHS.src + '/background.js',
     proxyAjax: PATHS.src + '/proxyAjax.js',
     zhilianFirstOpen: PATHS.src + '/plantforms/zhilian/firstOpen.js',
+    offscreen:PATHS.src + '/offscreen/index.js'
   },
 });
 
