@@ -26,11 +26,6 @@ const common = {
   },
   module: {
     rules: [
-      // Help webpack in understanding CSS files imported in .js files
-      {
-        test: /\.css$/,
-        use: [MiniCssExtractPlugin.loader, 'css-loader'],
-      },
       // Check for images imported in .js files and
       {
         test: /\.(png|jpe?g|gif)$/i,

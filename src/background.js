@@ -1,6 +1,10 @@
 import {debugLog} from "./log";
 
 debugLog('background ready');
+//sidepanel
+chrome.runtime.onInstalled.addListener(() => {
+  chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
+});
 
 let creating;
 async function setupOffscreenDocument(path) {
@@ -51,6 +55,7 @@ async function setupOffscreenDocument(path) {
       data
     });
   };
+
 }
 
 setupOffscreenDocument("offscreen.html");

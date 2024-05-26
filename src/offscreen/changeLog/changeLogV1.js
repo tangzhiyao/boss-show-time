@@ -16,14 +16,22 @@ const SQL_CREATE_TABLE_JOB = `
     job_salary_min TEXT,
     job_salary_max TEXT,
     job_salary_total_month TEXT,
+    job_first_publish_datetime DATETIME,
     boss_name TEXT,
     boss_company_name  TEXT,
     boss_position TEXT,
-    data_source TEXT,
     create_datetime DATETIME,
     update_datetime DATETIME
   )
   `;
+
+//data_source空间占用为每条岗位基础数据的1.5倍，决定不保留
+// const SQL_CREATE_TABLE_JOB_DATA_SOURCE = `
+//   CREATE TABLE job_data_source(
+//     job_id TEXT PRIMARY KEY,
+//     data_source TEXT
+//   )
+// `;
 
 const SQL_CREATE_TABLE_JOB_BROWSE_HISTORY = `
   CREATE TABLE job_browse_history(

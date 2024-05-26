@@ -102,7 +102,7 @@ export function createDOM(
   const div = document.createElement('div');
   div.classList.add('__zhipin_time_tag');
   renderTimeTag(div, lastModifyTime, brandName, {
-    jobDesc: positionDetail?.replaceAll('<br />', ''),
+    jobDesc: positionDetail?.replace(/<\/?.+?\/?>/g,''),
     firstPublishTime: createTime,
     jobDTO: jobDTO,
   });

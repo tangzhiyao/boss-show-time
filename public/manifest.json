@@ -12,7 +12,10 @@
     "background": {
         "service_worker": "background.js",
         "type": "module"
-      },
+    },
+    "action": {
+        "default_title": "Click to open panel"
+    },
     "content_security_policy": {
         "extension_pages": "script-src 'self' 'wasm-unsafe-eval'"
     },
@@ -38,9 +41,14 @@
             ]
         }
     ],
+    "side_panel": {
+        "default_path": "sidepanel.html"
+      },
     "permissions": [
         "webRequest",
-        "offscreen"
+        "offscreen",
+        "sidePanel",
+        "unlimitedStorage"
     ],
     "host_permissions": [
         "https://www.zhipin.com/*",

@@ -4,10 +4,12 @@ import {
   PLATFORM_ID_PREFIX_51JOB,
   PLATFORM_LAGOU,
   PLATFORM_ZHILIAN,
+  JOB_STATUS_DESC_NEWEST,
 } from './common';
 import { Job } from './domain/job';
 import { JobApi } from './api';
 import { infoLog } from './log';
+import dayjs from 'dayjs';
 
 export async function saveBrowseJob(list, platform) {
   infoLog(
@@ -16,17 +18,19 @@ export async function saveBrowseJob(list, platform) {
       ',platform = ' +
       platform
   );
+  let jobs;
   if (PLATFORM_51JOB == platform) {
-    await handle51JobData(list);
+    jobs = handle51JobData(list);
   } else if (PLATFORM_BOSS == platform) {
-    await handleBossData(list);
+    jobs = handleBossData(list);
   } else if (PLATFORM_ZHILIAN == platform) {
-    await handleZhilianData(list);
+    jobs = handleZhilianData(list);
   } else if (PLATFORM_LAGOU == platform) {
-    await handleLagouData(list);
+    jobs = handleLagouData(list);
   } else {
     //skip
   }
+  await JobApi.batchAddOrUpdateJobBrowse(jobs);
   infoLog('saveBrowseJob success,record size = ' + list.length);
 }
 
@@ -47,7 +51,7 @@ export function getJobIds(list, platform) {
       jobId = item.jobId;
     } else if (PLATFORM_LAGOU == platform) {
       jobId = item.positionId;
-    }else{
+    } else {
       //skip
     }
     result.push(genId(jobId, platform));
@@ -55,14 +59,29 @@ export function getJobIds(list, platform) {
   return result;
 }
 
-async function handleLagouData(list) {
+function handleLagouData(list) {
+  let jobs = [];
   for (var i = 0; i < list.length; i++) {
     var job = new Job();
     var item = list[i];
-    const {positionId,positionName,companyFullName,city,positionAddress,longitude,latitude,positionDetail,education,workYear,salary,publisherId,} = item;
-    job.jobId = genId(positionId,PLATFORM_LAGOU);
+    const {
+      positionId,
+      positionName,
+      companyFullName,
+      city,
+      positionAddress,
+      longitude,
+      latitude,
+      positionDetail,
+      education,
+      workYear,
+      salary,
+      publisherId,
+      createTime,
+    } = item;
+    job.jobId = genId(positionId, PLATFORM_LAGOU);
     job.jobPlatform = PLATFORM_LAGOU;
-    job.jobUrl = "https://www.lagou.com/wn/jobs/"+positionId+".html";
+    job.jobUrl = 'https://www.lagou.com/wn/jobs/' + positionId + '.html';
     job.jobName = positionName;
     job.jobCompanyName = companyFullName;
     job.jobLocationName = city;
@@ -75,15 +94,17 @@ async function handleLagouData(list) {
     job.jobSalaryMin = salary;
     job.jobSalaryMax = salary;
     job.jobSalaryTotalMonth = '';
+    job.jobFirstPublishDatetime = createTime;
     job.bossName = publisherId;
     job.bossCompanyName = companyFullName;
     job.bossPosition = null;
-    job.dataSource = JSON.stringify(item);
-    await JobApi.addOrUpdateJobBrowse(job);
+    jobs.push(job);
   }
+  return jobs;
 }
 
-async function handleZhilianData(list) {
+function handleZhilianData(list) {
+  let jobs = [];
   for (var i = 0; i < list.length; i++) {
     var job = new Job();
     var item = list[i];
@@ -98,6 +119,7 @@ async function handleZhilianData(list) {
       education,
       workingExp,
       salaryReal,
+      firstPublishTime,
     } = item;
     const { staffName, hrJob } = item.staffCard;
     job.jobId = genId(jobId, PLATFORM_ZHILIAN);
@@ -115,15 +137,17 @@ async function handleZhilianData(list) {
     job.jobSalaryMin = salaryReal;
     job.jobSalaryMax = salaryReal;
     job.jobSalaryTotalMonth = '';
+    job.jobFirstPublishDatetime = firstPublishTime;
     job.bossName = staffName;
     job.bossCompanyName = companyName;
     job.bossPosition = hrJob;
-    job.dataSource = JSON.stringify(item);
-    await JobApi.addOrUpdateJobBrowse(job);
+    jobs.push(job);
   }
+  return jobs;
 }
 
-async function handleBossData(list) {
+function handleBossData(list) {
+  let jobs = [];
   for (var i = 0; i < list.length; i++) {
     var job = new Job();
     var item = list[i];
@@ -141,10 +165,12 @@ async function handleBossData(list) {
       degreeName,
       experienceName,
       salaryDesc,
+      jobStatusDesc,
+      jobUrl,
     } = zpData.jobInfo;
     job.jobId = genId(encryptId, PLATFORM_BOSS);
     job.jobPlatform = PLATFORM_BOSS;
-    job.jobUrl = '';
+    job.jobUrl = jobUrl;
     job.jobName = jobName;
     job.jobCompanyName = brandName;
     job.jobLocationName = locationName;
@@ -157,15 +183,22 @@ async function handleBossData(list) {
     job.jobSalaryMin = salaryDesc;
     job.jobSalaryMax = salaryDesc;
     job.jobSalaryTotalMonth = '';
+    if(jobStatusDesc == JOB_STATUS_DESC_NEWEST.key){
+      //招聘状态为最新，则代表一周内发布的岗位。记录入库的时间设置取今天零点。
+      job.jobFirstPublishDatetime = dayjs(new Date()).startOf('day');
+    }else{
+      job.jobFirstPublishDatetime = null;
+    }
     job.bossName = name;
     job.bossCompanyName = bossBranchName;
     job.bossPosition = title;
-    job.dataSource = JSON.stringify(item);
-    await JobApi.addOrUpdateJobBrowse(job);
+    jobs.push(job);
   }
+  return jobs;
 }
 
-async function handle51JobData(list) {
+function handle51JobData(list) {
+  let jobs = [];
   for (var i = 0; i < list.length; i++) {
     var job = new Job();
     var item = list[i];
@@ -184,6 +217,7 @@ async function handle51JobData(list) {
       jobSalaryMax,
       hrName,
       hrPosition,
+      confirmDateString,
     } = item;
     job.jobId = genId(jobId, PLATFORM_51JOB);
     job.jobPlatform = PLATFORM_51JOB;
@@ -200,10 +234,11 @@ async function handle51JobData(list) {
     job.jobSalaryMin = jobSalaryMin;
     job.jobSalaryMax = jobSalaryMax;
     job.jobSalaryTotalMonth = '';
+    job.jobFirstPublishDatetime = confirmDateString;
     job.bossName = hrName;
     job.bossCompanyName = fullCompanyName;
     job.bossPosition = hrPosition;
-    job.dataSource = JSON.stringify(item);
-    await JobApi.addOrUpdateJobBrowse(job);
+    jobs.push(job);
   }
+  return jobs;
 }

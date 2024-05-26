@@ -80,19 +80,27 @@ function convertJobStatusDesc(statusText) {
 
 // 解析数据，插入时间标签
 function parseBossData(list, getListItem) {
+  const apiUrlList = [];
   const urlList = [];
   list.forEach((item) => {
     const { itemId, brandName, securityId } = item;
     const dom = getListItem(itemId);
-    var pureJobItemDetailUrl =
+    //apiUrl
+    var pureJobItemDetailApiUrl =
       "https://www.zhipin.com/wapi/zpgeek/job/detail.json?securityId=" +
       securityId;
+    apiUrlList.push(pureJobItemDetailApiUrl);
+    //jobUrl
+    const jobItemDetailUrl = dom.childNodes[0].childNodes[0].href;
+    const url = new URL(jobItemDetailUrl);
+    let pureJobItemDetailUrl = url.origin + url.pathname;
     urlList.push(pureJobItemDetailUrl);
+
     let loadingLastModifyTimeTag = createLoadingDOM(brandName,"__boss_time_tag");
     dom.appendChild(loadingLastModifyTimeTag);
   });
   let promiseList = [];
-  urlList.forEach(async (url, index) => {
+  apiUrlList.forEach(async (url, index) => {
     const delay = (
       ms = DELAY_FETCH_TIME * index +
         getRandomInt(DELAY_FETCH_TIME_RANDOM_OFFSET)
@@ -108,13 +116,17 @@ function parseBossData(list, getListItem) {
       }
     });
     promiseList.push(promise);
-    if (index == urlList.length - 1) {
+    if (index == apiUrlList.length - 1) {
       const lastModifyTimeList = [];
       const jobStatusDescList = [];
       const jobDesc = [];
       var jobDTOList = [];
       Promise.allSettled(promiseList)
         .then( async (jsonList) => {
+          jsonList.forEach((item,index) => {
+            item.value.zpData.jobInfo.jobUrl = urlList[index];
+          })
+          
           await saveBrowseJob(jsonList,PLATFORM_BOSS);
           jobDTOList = await JobApi.getJobBrowseInfoByIds(getJobIds(jsonList,PLATFORM_BOSS));
           jsonList.forEach((item) => {
