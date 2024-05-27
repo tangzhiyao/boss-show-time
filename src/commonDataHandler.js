@@ -12,6 +12,7 @@ import { infoLog } from './log';
 import dayjs from 'dayjs';
 
 const SALARY_MATCH = /(?<min>[0-9\.]*)\D*(?<max>[0-9\.]*)\D*(?<month>\d*)/;
+const JOB_YEAR_MATCH = /(?<min>[0-9\.]*)\D*(?<max>[0-9\.]*)/;
 
 export async function saveBrowseJob(list, platform) {
   infoLog(
@@ -92,7 +93,13 @@ function handleLagouData(list) {
     job.jobLatitude = latitude;
     job.jobDescription = positionDetail;
     job.jobDegreeName = education;
-    job.jobYear = workYear;
+    //handle job year
+    let jobYearGroups = workYear.match(JOB_YEAR_MATCH)?.groups;
+    if(jobYearGroups){
+      job.jobYear = jobYearGroups.min;
+    }else{
+      //skip
+    }
     //handle salary
     let groups = salary.match(SALARY_MATCH)?.groups;
     if(groups){
@@ -143,7 +150,13 @@ function handleZhilianData(list) {
     job.jobLatitude = null;
     job.jobDescription = jobSummary;
     job.jobDegreeName = education;
-    job.jobYear = workingExp;
+    //handle job year
+    let jobYearGroups = workingExp.match(JOB_YEAR_MATCH)?.groups;
+    if(jobYearGroups){
+      job.jobYear = jobYearGroups.min;
+    }else{
+      //skip
+    }
     //handle salary
     let groups = salaryReal.match(SALARY_MATCH)?.groups;
     if(groups){
@@ -197,7 +210,13 @@ function handleBossData(list) {
     job.jobLatitude = latitude;
     job.jobDescription = postDescription;
     job.jobDegreeName = degreeName;
-    job.jobYear = experienceName;
+    //handle job year
+    let jobYearGroups = experienceName.match(JOB_YEAR_MATCH)?.groups;
+    if(jobYearGroups){
+      job.jobYear = jobYearGroups.min;
+    }else{
+      //skip
+    }
     //handle salary
     let groups = salaryDesc.match(SALARY_MATCH)?.groups;
     if(groups){
@@ -237,13 +256,13 @@ function handle51JobData(list) {
       lon,
       jobDescribe,
       degreeString,
-      workYear,
       jobSalaryMin,
       jobSalaryMax,
       hrName,
       hrPosition,
       confirmDateString,
       provideSalaryString,
+      workYearString,
     } = item;
     job.jobId = genId(jobId, PLATFORM_51JOB);
     job.jobPlatform = PLATFORM_51JOB;
@@ -256,7 +275,12 @@ function handle51JobData(list) {
     job.jobLatitude = lat;
     job.jobDescription = jobDescribe;
     job.jobDegreeName = degreeString;
-    job.jobYear = workYear;
+    if(workYearString.endsWith("无需经验")){
+      job.jobYear = 0;
+    }else{
+      let groups = workYearString.match(/(?<min>[0-9\.]*)/)?.groups;
+      job.jobYear = groups.min;
+    }    
     job.jobSalaryMin = jobSalaryMin;
     job.jobSalaryMax = jobSalaryMax;
     if(provideSalaryString.endsWith("薪")){

@@ -12,7 +12,7 @@ const SQL_CREATE_TABLE_JOB = `
     job_latitude NUMERIC,
     job_description TEXT,
     job_degree_name TEXT,
-    job_year TEXT,
+    job_year NUMERIC,
     job_salary_min NUMERIC,
     job_salary_max NUMERIC,
     job_salary_total_month NUMERIC,
