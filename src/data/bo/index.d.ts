@@ -1,0 +1,1 @@
+declare module "@/data/bo/searchJobBO.js";

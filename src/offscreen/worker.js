@@ -1,15 +1,15 @@
 import { infoLog, debugLog } from '../log';
 import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import { Job } from '../domain/job';
+import { Job } from '@/data/domain/job';
 import { Message } from '../api/bridge';
 import dayjs from 'dayjs';
-import { JobDTO } from '../dto/jobDTO';
+import { JobDTO } from '@/data/dto/jobDTO';
 import { toHump } from '../utils';
 import { ChangeLogV1 } from './changeLog/changeLogV1';
 import { initChangeLog, getChangeLogList } from './changeLog';
-import { StatisticJobBrowseDTO } from '../dto/statisticJobBrowseDTO';
-import { SearchJobBO } from '@/bo/pageBO';
-import { SearchJobDTO } from '../dto/searchJobDTO';
+import { StatisticJobBrowseDTO } from '@/data/dto/statisticJobBrowseDTO';
+import { SearchJobBO } from '@/data/bo/pageBO';
+import { SearchJobDTO } from '@/data/dto/searchJobDTO';
 debugLog('worker ready');
 
 let db;

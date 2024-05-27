@@ -8,7 +8,7 @@ const SidepanelPath = {
 
 const sidepanel = {
   entry: {
-    sidepanel: PATHS.src + "/pages/sidepanel/main.js",
+    sidepanel: PATHS.src + "/sidepanel/main.js",
   },
   plugins: [
     new HtmlWebpackPlugin({

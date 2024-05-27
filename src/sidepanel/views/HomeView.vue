@@ -181,7 +181,7 @@
 import { onMounted, ref, provide, computed } from "vue";
 import { useTransition } from "@vueuse/core";
 import { JobApi } from "@/api/index.js";
-import { SearchJobBO } from "@/bo/searchJobBO.js";
+import { SearchJobBO } from "@/data/bo/searchJobBO.js";
 import dayjs from "dayjs";
 import { utils, writeFileXLSX } from "xlsx";
 
