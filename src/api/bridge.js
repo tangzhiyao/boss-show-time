@@ -4,6 +4,12 @@ import { debugLog } from "../log";
 const callbackPromiseHookMap = new Map();
 var seq = 0;
 
+/**
+ * 
+ * @param {string} action 通过传入src/offscreen/worker.js里的WorkerBridge的方法名，实现方法的调用
+ * @param {*} param 所需要传递的调用参数，在被调用方法的param参数中有体现
+ * @returns 
+ */
 export function invoke(action,param){
     var promise = new Promise((resolve,reject)=>{
         var callbackId = genCallbackId();
