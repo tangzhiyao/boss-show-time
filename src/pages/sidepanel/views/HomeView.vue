@@ -28,6 +28,7 @@
           />
         </div>
         <div>
+          <el-button @click="searchResultExport">导出</el-button>
           <el-button @click="reset">重置</el-button>
           <el-button @click="onClickSearch"
             ><el-icon><Search /></el-icon
@@ -77,7 +78,11 @@
                 <template #label>
                   <div class="cell-item">名称</div>
                 </template>
-                <a :href="props.row.jobUrl" target="_blank" :title="props.row.jobUrl">
+                <a
+                  :href="props.row.jobUrl"
+                  target="_blank"
+                  :title="props.row.jobUrl"
+                >
                   {{ props.row.jobName }}
                 </a>
               </el-descriptions-item>
@@ -173,11 +178,12 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, provide, computed } from 'vue';
-import { useTransition } from '@vueuse/core';
-import { JobApi } from '@/api/index.js';
-import { SearchJobBO } from '@/bo/searchJobBO.js';
-import dayjs from 'dayjs';
+import { onMounted, ref, provide, computed } from "vue";
+import { useTransition } from "@vueuse/core";
+import { JobApi } from "@/api/index.js";
+import { SearchJobBO } from "@/bo/searchJobBO.js";
+import dayjs from "dayjs";
+import { utils, writeFileXLSX } from "xlsx";
 
 const todayBrowseCountSource = ref(0);
 const totalBrowseCountSource = ref(0);
@@ -204,7 +210,7 @@ const background = ref(false);
 const disabled = ref(false);
 const datetimeFormat = computed(() => {
   return function (value: string) {
-    return dayjs(value).isValid() ? dayjs(value).format('YYYY-MM-DD') : '未知';
+    return dayjs(value).isValid() ? dayjs(value).format("YYYY-MM-DD") : "未知";
   };
 });
 const jobSearchName = ref(null);
@@ -226,6 +232,41 @@ onMounted(async () => {
   setInterval(refreshStatistic, 10000);
   search();
 });
+
+const searchResultExport = async () => {
+  let list = tableData.value;
+  let result = [];
+  for (let i = 0; i < list.length; i++) {
+    let item = list[i];
+    result.push({
+      职位自编号: item.jobId,
+      发布平台: item.jobPlatform,
+      职位访问地址: item.jobUrl,
+      职位: item.jobName,
+      公司: item.jobCompanyName,
+      地区: item.jobLocationName,
+      地址: item.jobAddress,
+      经度: item.jobLongitude,
+      维度: item.jobLatitude,
+      职位描述: item.jobDescription,
+      学历: item.jobDegreeName,
+      所需经验: item.jobYear,
+      最低薪资: item.jobSalaryMin,
+      最高薪资: item.jobSalaryMax,
+      几薪: item.jobSalaryTotalMonth,
+      首次发布时间: item.jobFirstPublishDatetime,
+      招聘人: item.bossName,
+      招聘公司: item.bossCompanyName,
+      招聘者职位: item.bossPosition,
+      首次浏览日期: item.createDatetime,
+      记录更新日期: item.updateDatetime,
+    });
+  }
+  const ws = utils.json_to_sheet(result);
+  const wb = utils.book_new();
+  utils.book_append_sheet(wb, ws, "Data");
+  writeFileXLSX(wb, dayjs(new Date()).format("YYYYMMDDHHmmss") + ".xlsx");
+};
 
 const onClickSearch = async () => {
   currentPage.value = 1;
