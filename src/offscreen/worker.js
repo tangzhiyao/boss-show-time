@@ -12,8 +12,8 @@ import { SearchJobBO } from '@/bo/pageBO';
 import { SearchJobDTO } from '../dto/searchJobDTO';
 debugLog('worker ready');
 
-var db;
-var initializing = false;
+let db;
+let initializing = false;
 
 export const WorkerBridge = {
   /**
@@ -107,13 +107,13 @@ export const WorkerBridge = {
    */
   getJobBrowseInfoByIds: function (message, param) {
     try {
-      var countMap = new Map();
-      var ids = "'" + param.join("','") + "'";
+      let countMap = new Map();
+      let ids = "'" + param.join("','") + "'";
       const SQL_QUERY_JOB_BOWSE_HISTORY_GROUP_COUNT =
         'SELECT job_id AS jobId ,count(*) AS total FROM job_browse_history WHERE job_id IN (' +
         ids +
         ') GROUP BY job_id;';
-      var countRows = [];
+      let countRows = [];
       db.exec({
         sql: SQL_QUERY_JOB_BOWSE_HISTORY_GROUP_COUNT,
         rowMode: 'object',
@@ -123,23 +123,23 @@ export const WorkerBridge = {
         let item = countRows[i];
         countMap.set(item.jobId, item.total);
       }
-      var tempResultMap = new Map();
+      let tempResultMap = new Map();
       const SQL_QUERY_JOB =
         'SELECT job_id,job_platform,job_url,job_name,job_company_name,job_location_name,job_address,job_longitude,job_latitude,job_description,job_degree_name,job_year,job_salary_min,job_salary_max,job_salary_total_month,boss_name,boss_company_name,boss_position,create_datetime,update_datetime FROM job WHERE job_id in (' +
         ids +
         ')';
-      var rows = [];
+      let rows = [];
       db.exec({
         sql: SQL_QUERY_JOB,
         rowMode: 'object',
         resultRows: rows,
       });
-      for (var i = 0; i < rows.length; i++) {
-        var item = rows[i];
-        var resultItem = new JobDTO();
-        var keys = Object.keys(item);
+      for (let i = 0; i < rows.length; i++) {
+        let item = rows[i];
+        let resultItem = new JobDTO();
+        let keys = Object.keys(item);
         for (let n = 0; n < keys.length; n++) {
-          var key = keys[n];
+          let key = keys[n];
           resultItem[toHump(key)] = item[key];
         }
         tempResultMap.set(resultItem.jobId, resultItem);
@@ -224,12 +224,12 @@ export const WorkerBridge = {
         resultRows: queryRows,
       });
 
-      for (var i = 0; i < queryRows.length; i++) {
+      for (let i = 0; i < queryRows.length; i++) {
         let item = queryRows[i];
         let resultItem = new JobDTO();
-        var keys = Object.keys(item);
+        let keys = Object.keys(item);
         for (let n = 0; n < keys.length; n++) {
-          var key = keys[n];
+          let key = keys[n];
           resultItem[key] = item[key];
         }
         items.push(item);
@@ -237,7 +237,7 @@ export const WorkerBridge = {
 
       //count
       sqlCount += whereCondition;
-      var queryCountRows = [];
+      let queryCountRows = [];
       db.exec({
         sql: sqlCount,
         rowMode: 'object',
@@ -268,7 +268,7 @@ export const WorkerBridge = {
       let todayEnd = now.startOf('day').add(1,'day').format('YYYY-MM-DD HH:mm:ss');
       const SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TODAY =
         'SELECT COUNT(*) AS count FROM job_browse_history WHERE job_visit_datetime >= $startDatetime AND job_visit_datetime < $endDatetime';
-      var browseCountToday = [];
+      let browseCountToday = [];
       db.exec({
         sql: SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TODAY,
         rowMode: 'object',
@@ -280,14 +280,14 @@ export const WorkerBridge = {
       });
       const SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TOTAL =
         'SELECT COUNT(*) AS count FROM job_browse_history';
-      var browseTotalCount = [];
+      let browseTotalCount = [];
       db.exec({
         sql: SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TOTAL,
         rowMode: 'object',
         resultRows: browseTotalCount,
       });
       const SQL_QUERY_JOB_COUNT_TOTAL = 'SELECT COUNT(*) AS count FROM job;';
-      var jobTotalCount = [];
+      let jobTotalCount = [];
       db.exec({
         sql: SQL_QUERY_JOB_COUNT_TOTAL,
         rowMode: 'object',
@@ -307,9 +307,9 @@ export const WorkerBridge = {
 };
 
 const ACTION_FUNCTION = new Map();
-var keys = Object.keys(WorkerBridge);
-for (var i = 0; i < keys.length; i++) {
-  var key = keys[i];
+let keys = Object.keys(WorkerBridge);
+for (let i = 0; i < keys.length; i++) {
+  let key = keys[i];
   ACTION_FUNCTION.set(key, WorkerBridge[key]);
 }
 
@@ -428,7 +428,7 @@ const initDb = function (sqlite3) {
   `;
     db.exec(SQL_CREATE_TABLE_VERSION);
     const SQL_QUERY_VERSION = 'SELECT num FROM version';
-    var rows = [];
+    let rows = [];
     db.exec({
       sql: SQL_QUERY_VERSION,
       rowMode: 'object',
@@ -494,18 +494,18 @@ const initDb = function (sqlite3) {
 };
 
 onmessage = function (e) {
-  var message = e.data;
+  let message = e.data;
   debugLog(
     '[worker][receive][offscreen -> worker] message = ' +
       JSON.stringify(message)
   );
-  var action = message.action;
+  let action = message.action;
   debugLog('[worker] invoke action = ' + action);
   ACTION_FUNCTION.get(action)(message, message.param);
 };
 
 function postSuccessMessage(message, data) {
-  var resultMessage = JSON.parse(JSON.stringify(message));
+  let resultMessage = JSON.parse(JSON.stringify(message));
   resultMessage.data = data;
   postMessage({
     type: 'db',
@@ -519,7 +519,7 @@ function postSuccessMessage(message, data) {
 
 function postErrorMessage(message, error) {
   infoLog(error);
-  var resultMessage = JSON.parse(JSON.stringify(message));
+  let resultMessage = JSON.parse(JSON.stringify(message));
   debugLog(resultMessage);
   resultMessage.error = error;
   postMessage({
