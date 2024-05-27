@@ -345,7 +345,7 @@ function insertJobAndBrowseHistory(param, now) {
         $job_year: param.jobYear,
         $job_salary_min: param.jobSalaryMin,
         $job_salary_max: param.jobSalaryMax,
-        $job_salary_total_month: param.jobSalaryTotal,
+        $job_salary_total_month: param.jobSalaryTotalMonth,
         $job_first_publish_datetime: dayjs(
           param.jobFirstPublishDatetime
         ).isValid()
