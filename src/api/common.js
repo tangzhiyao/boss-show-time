@@ -16,7 +16,7 @@ export async function initBridge() {
  * @returns base64 database file
  */
 export async function dbExport(){
-  let result = await invoke(dbExport.name, {});
+  let result = await invoke("dbExport", {});
   return result.data;
 }
 
@@ -25,6 +25,6 @@ export async function dbExport(){
  * @returns bytesToWrite
  */
 export async function dbImport(param){
-  let result = await invoke(dbImport.name, param);
+  let result = await invoke("dbImport", param);
   return result.data;
 }
