@@ -2,6 +2,12 @@ import { BACKGROUND, CONTENT_SCRIPT, OFFSCREEN } from "./api/bridgeCommon";
 import { debugLog, infoLog } from "./log";
 
 debugLog("background ready");
+debugLog("keepAlive start");
+//see https://stackoverflow.com/questions/66618136/persistent-service-worker-in-chrome-extension
+const keepAlive = () => setInterval(chrome.runtime.getPlatformInfo, 20e3);
+chrome.runtime.onStartup.addListener(keepAlive);
+keepAlive();
+
 //sidepanel
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
