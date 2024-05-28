@@ -1,17 +1,24 @@
-import { infoLog, debugLog } from '../log';
-import sqlite3InitModule from '@sqlite.org/sqlite-wasm';
-import { Job } from '@/data/domain/job';
-import { Message } from '../api/bridge';
-import dayjs from 'dayjs';
-import { JobDTO } from '@/data/dto/jobDTO';
-import { toHump } from '../utils';
-import { ChangeLogV1 } from './changeLog/changeLogV1';
-import { initChangeLog, getChangeLogList } from './changeLog';
-import { StatisticJobBrowseDTO } from '@/data/dto/statisticJobBrowseDTO';
-import { SearchJobBO } from '@/data/bo/pageBO';
-import { SearchJobDTO } from '@/data/dto/searchJobDTO';
-debugLog('worker ready');
+import { infoLog, debugLog } from "../log";
+import sqlite3InitModule, { Sqlite3Static } from "@sqlite.org/sqlite-wasm";
+import { Job } from "@/data/domain/job";
+import { Message } from "../api/bridge";
+import dayjs from "dayjs";
+import { JobDTO } from "@/data/dto/jobDTO";
+import { toHump } from "../utils";
+import { ChangeLogV1 } from "./changeLog/changeLogV1";
+import { initChangeLog, getChangeLogList } from "./changeLog";
+import { StatisticJobBrowseDTO } from "@/data/dto/statisticJobBrowseDTO";
+import { SearchJobBO } from "@/data/bo/pageBO";
+import { SearchJobDTO } from "@/data/dto/searchJobDTO";
+import { bytesToBase64, base64ToBytes } from "@/utils/base64.js";
+import JSZip from "jszip";
 
+debugLog("worker ready");
+
+const JOB_DB_FILE_NAME = "job.sqlite3";
+const JOB_DB_PATH = "/" + JOB_DB_FILE_NAME;
+let capi;
+let oo;
 let db;
 let initializing = false;
 
@@ -22,7 +29,7 @@ export const WorkerBridge = {
    * @param {*} param
    */
   init: function (message, param) {
-    debugLog('Loading and initializing sqlite3 module...');
+    debugLog("Loading and initializing sqlite3 module...");
     let changelogList = [];
     changelogList.push(new ChangeLogV1());
     initChangeLog(changelogList);
@@ -30,14 +37,14 @@ export const WorkerBridge = {
       print: debugLog,
       printErr: infoLog,
     }).then(function (sqlite3) {
-      debugLog('Done initializing. Running app...');
+      debugLog("Done initializing. Running app...");
       if (!initializing) {
         try {
           initDb(sqlite3);
           initializing = true;
           postSuccessMessage(message);
         } catch (e) {
-          postErrorMessage(message, 'init sqlite3 error : ' + e.message);
+          postErrorMessage(message, "init sqlite3 error : " + e.message);
         }
       } else {
         postSuccessMessage(message);
@@ -45,7 +52,7 @@ export const WorkerBridge = {
     });
   },
   ping: function (message, param) {
-    postSuccessMessage(message, 'pong');
+    postSuccessMessage(message, "pong");
   },
 
   /**
@@ -57,19 +64,19 @@ export const WorkerBridge = {
     try {
       const now = new Date();
       db.exec({
-        sql: 'BEGIN TRANSACTION',
+        sql: "BEGIN TRANSACTION",
       });
       for (let i = 0; i < param.length; i++) {
         insertJobAndBrowseHistory(param[i], now);
       }
       db.exec({
-        sql: 'COMMIT',
+        sql: "COMMIT",
       });
       postSuccessMessage(message, {});
     } catch (e) {
       postErrorMessage(
         message,
-        '[worker] addOrUpdateJobBrowse error : ' + e.message
+        "[worker] addOrUpdateJobBrowse error : " + e.message
       );
     }
   },
@@ -83,17 +90,17 @@ export const WorkerBridge = {
     try {
       const now = new Date();
       db.exec({
-        sql: 'BEGIN TRANSACTION',
+        sql: "BEGIN TRANSACTION",
       });
       insertJobAndBrowseHistory(param, now);
       db.exec({
-        sql: 'COMMIT',
+        sql: "COMMIT",
       });
       postSuccessMessage(message, {});
     } catch (e) {
       postErrorMessage(
         message,
-        '[worker] addOrUpdateJobBrowse error : ' + e.message
+        "[worker] addOrUpdateJobBrowse error : " + e.message
       );
     }
   },
@@ -110,13 +117,13 @@ export const WorkerBridge = {
       let countMap = new Map();
       let ids = "'" + param.join("','") + "'";
       const SQL_QUERY_JOB_BOWSE_HISTORY_GROUP_COUNT =
-        'SELECT job_id AS jobId ,count(*) AS total FROM job_browse_history WHERE job_id IN (' +
+        "SELECT job_id AS jobId ,count(*) AS total FROM job_browse_history WHERE job_id IN (" +
         ids +
-        ') GROUP BY job_id;';
+        ") GROUP BY job_id;";
       let countRows = [];
       db.exec({
         sql: SQL_QUERY_JOB_BOWSE_HISTORY_GROUP_COUNT,
-        rowMode: 'object',
+        rowMode: "object",
         resultRows: countRows,
       });
       for (let i = 0; i < countRows.length; i++) {
@@ -125,13 +132,13 @@ export const WorkerBridge = {
       }
       let tempResultMap = new Map();
       const SQL_QUERY_JOB =
-        'SELECT job_id,job_platform,job_url,job_name,job_company_name,job_location_name,job_address,job_longitude,job_latitude,job_description,job_degree_name,job_year,job_salary_min,job_salary_max,job_salary_total_month,boss_name,boss_company_name,boss_position,create_datetime,update_datetime FROM job WHERE job_id in (' +
+        "SELECT job_id,job_platform,job_url,job_name,job_company_name,job_location_name,job_address,job_longitude,job_latitude,job_description,job_degree_name,job_year,job_salary_min,job_salary_max,job_salary_total_month,boss_name,boss_company_name,boss_position,create_datetime,update_datetime FROM job WHERE job_id in (" +
         ids +
-        ')';
+        ")";
       let rows = [];
       db.exec({
         sql: SQL_QUERY_JOB,
-        rowMode: 'object',
+        rowMode: "object",
         resultRows: rows,
       });
       for (let i = 0; i < rows.length; i++) {
@@ -157,7 +164,7 @@ export const WorkerBridge = {
     } catch (e) {
       postErrorMessage(
         message,
-        '[worker] getJobBrowseInfoByIds error : ' + e.message
+        "[worker] getJobBrowseInfoByIds error : " + e.message
       );
     }
   },
@@ -173,13 +180,13 @@ export const WorkerBridge = {
     try {
       let result = new SearchJobDTO();
       let sqlQuery =
-        'SELECT job_id AS jobId,job_platform AS jobPlatform,job_url AS jobUrl,job_name AS jobName,job_company_name AS jobCompanyName,job_location_name AS jobLocationName,job_address AS jobAddress,job_longitude AS jobLongitude,job_latitude AS jobLatitude,job_description AS jobDescription,job_degree_name AS jobDegreeName,job_year AS jobYear,job_salary_min AS jobSalaryMin,job_salary_max AS jobSalaryMax,job_salary_total_month AS jobSalaryTotalMonth,job_first_publish_datetime AS jobFirstPublishDatetime,boss_name AS bossName,boss_company_name AS bossCompanyName,boss_position AS bossPosition,create_datetime AS createDatetime,update_datetime AS updateDatetime FROM job';
-      let sqlCount = 'SELECT COUNT(*) AS total from job';
-      let whereCondition = '';
-      let orderBy = ' ORDER BY create_datetime DESC';
+        "SELECT job_id AS jobId,job_platform AS jobPlatform,job_url AS jobUrl,job_name AS jobName,job_company_name AS jobCompanyName,job_location_name AS jobLocationName,job_address AS jobAddress,job_longitude AS jobLongitude,job_latitude AS jobLatitude,job_description AS jobDescription,job_degree_name AS jobDegreeName,job_year AS jobYear,job_salary_min AS jobSalaryMin,job_salary_max AS jobSalaryMax,job_salary_total_month AS jobSalaryTotalMonth,job_first_publish_datetime AS jobFirstPublishDatetime,boss_name AS bossName,boss_company_name AS bossCompanyName,boss_position AS bossPosition,create_datetime AS createDatetime,update_datetime AS updateDatetime FROM job";
+      let sqlCount = "SELECT COUNT(*) AS total from job";
+      let whereCondition = "";
+      let orderBy = " ORDER BY create_datetime DESC";
       let limitStart = (param.pageNum - 1) * param.pageSize;
       let limitEnd = param.pageSize;
-      let limit = ' limit ' + limitStart + ',' + limitEnd;
+      let limit = " limit " + limitStart + "," + limitEnd;
 
       if (param.jobName) {
         whereCondition += " AND job_name LIKE '%" + param.jobName + "%' ";
@@ -191,26 +198,30 @@ export const WorkerBridge = {
       if (param.startDatetime) {
         whereCondition +=
           " AND create_datetime >= '" +
-          dayjs(param.startDatetime).format('YYYY-MM-DD HH:mm:ss')+"'";
+          dayjs(param.startDatetime).format("YYYY-MM-DD HH:mm:ss") +
+          "'";
       }
       if (param.endDatetime) {
         whereCondition +=
           " AND create_datetime < '" +
-          dayjs(param.endDatetime).format('YYYY-MM-DD HH:mm:ss')+"'";
+          dayjs(param.endDatetime).format("YYYY-MM-DD HH:mm:ss") +
+          "'";
       }
       if (param.firstPublishStartDatetime) {
         whereCondition +=
           " AND job_first_publish_datetime >= '" +
-          dayjs(param.firstPublishStartDatetime).format('YYYY-MM-DD HH:mm:ss')+"'";
+          dayjs(param.firstPublishStartDatetime).format("YYYY-MM-DD HH:mm:ss") +
+          "'";
       }
       if (param.firstPublishEndDatetime) {
         whereCondition +=
           " AND job_first_publish_datetime < '" +
-          dayjs(param.firstPublishEndDatetime).format('YYYY-MM-DD HH:mm:ss')+"'";
+          dayjs(param.firstPublishEndDatetime).format("YYYY-MM-DD HH:mm:ss") +
+          "'";
       }
-      if (whereCondition.startsWith(' AND')) {
-        whereCondition = whereCondition.replace('AND', '');
-        whereCondition = ' WHERE ' + whereCondition;
+      if (whereCondition.startsWith(" AND")) {
+        whereCondition = whereCondition.replace("AND", "");
+        whereCondition = " WHERE " + whereCondition;
       }
       sqlQuery += whereCondition;
       sqlQuery += orderBy;
@@ -220,7 +231,7 @@ export const WorkerBridge = {
       let queryRows = [];
       db.exec({
         sql: sqlQuery,
-        rowMode: 'object',
+        rowMode: "object",
         resultRows: queryRows,
       });
 
@@ -240,7 +251,7 @@ export const WorkerBridge = {
       let queryCountRows = [];
       db.exec({
         sql: sqlCount,
-        rowMode: 'object',
+        rowMode: "object",
         resultRows: queryCountRows,
       });
       total = queryCountRows[0].total;
@@ -249,7 +260,7 @@ export const WorkerBridge = {
       result.total = total;
       postSuccessMessage(message, result);
     } catch (e) {
-      postErrorMessage(message, '[worker] searchJob error : ' + e.message);
+      postErrorMessage(message, "[worker] searchJob error : " + e.message);
     }
   },
 
@@ -264,14 +275,17 @@ export const WorkerBridge = {
     try {
       let result = new StatisticJobBrowseDTO();
       let now = dayjs();
-      let todayStart = now.startOf('day').format('YYYY-MM-DD HH:mm:ss');
-      let todayEnd = now.startOf('day').add(1,'day').format('YYYY-MM-DD HH:mm:ss');
+      let todayStart = now.startOf("day").format("YYYY-MM-DD HH:mm:ss");
+      let todayEnd = now
+        .startOf("day")
+        .add(1, "day")
+        .format("YYYY-MM-DD HH:mm:ss");
       const SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TODAY =
-        'SELECT COUNT(*) AS count FROM job_browse_history WHERE job_visit_datetime >= $startDatetime AND job_visit_datetime < $endDatetime';
+        "SELECT COUNT(*) AS count FROM job_browse_history WHERE job_visit_datetime >= $startDatetime AND job_visit_datetime < $endDatetime";
       let browseCountToday = [];
       db.exec({
         sql: SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TODAY,
-        rowMode: 'object',
+        rowMode: "object",
         resultRows: browseCountToday,
         bind: {
           $startDatetime: todayStart,
@@ -279,18 +293,18 @@ export const WorkerBridge = {
         },
       });
       const SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TOTAL =
-        'SELECT COUNT(*) AS count FROM job_browse_history';
+        "SELECT COUNT(*) AS count FROM job_browse_history";
       let browseTotalCount = [];
       db.exec({
         sql: SQL_QUERY_JOB_BOWSE_HISTORY_COUNT_TOTAL,
-        rowMode: 'object',
+        rowMode: "object",
         resultRows: browseTotalCount,
       });
-      const SQL_QUERY_JOB_COUNT_TOTAL = 'SELECT COUNT(*) AS count FROM job;';
+      const SQL_QUERY_JOB_COUNT_TOTAL = "SELECT COUNT(*) AS count FROM job;";
       let jobTotalCount = [];
       db.exec({
         sql: SQL_QUERY_JOB_COUNT_TOTAL,
-        rowMode: 'object',
+        rowMode: "object",
         resultRows: jobTotalCount,
       });
       result.todayBrowseCount = browseCountToday[0].count;
@@ -300,8 +314,55 @@ export const WorkerBridge = {
     } catch (e) {
       postErrorMessage(
         message,
-        '[worker] statisticJobBrowse error : ' + e.message
+        "[worker] statisticJobBrowse error : " + e.message
       );
+    }
+  },
+
+  /**
+   *
+   * @param {*} message
+   * @param { void } param
+   */
+  dbExport: async function (message, param) {
+    try {
+      let data = await capi.sqlite3_js_db_export(db);
+      const zip = new JSZip();
+      zip.file(JOB_DB_FILE_NAME, data);
+      zip
+        .generateAsync({
+          compression: "DEFLATE",
+          compressionOptions: { level: 9 },
+          type: "uint8array",
+        })
+        .then(function (content) {
+          postSuccessMessage(message, bytesToBase64(content));
+        });
+    } catch (e) {
+      postErrorMessage(message, "[worker] dbExport error : " + e.message);
+    }
+  },
+
+  /**
+   *
+   * @param {*} message
+   * @param {string} param base64 zip file
+   */
+  dbImport: async function (message, param) {
+    try {
+      const zip = new JSZip();
+      let zipContent = await zip.loadAsync(base64ToBytes(param));
+      let dbContent;
+      try {
+        dbContent = await zipContent.file(JOB_DB_FILE_NAME).async("uint8array");
+      } catch (e) {
+        postErrorMessage(message, "file: "+JOB_DB_FILE_NAME+" not found");
+        return;
+      }
+      let bytesToWrite = await oo.OpfsDb.importDb(JOB_DB_FILE_NAME, dbContent);
+      postSuccessMessage(message, bytesToWrite);
+    } catch (e) {
+      postErrorMessage(message, "[worker] dbExport error : " + e.message);
     }
   },
 };
@@ -318,7 +379,7 @@ function insertJobAndBrowseHistory(param, now) {
   const SQL_JOB_BY_ID = `SELECT job_id,job_platform,job_url,job_name,job_company_name,job_location_name,job_address,job_longitude,job_latitude,job_description,job_degree_name,job_year,job_salary_min,job_salary_max,job_salary_total_month,job_first_publish_datetime,boss_name,boss_company_name,boss_position,create_datetime,update_datetime FROM job WHERE job_id = ?`;
   db.exec({
     sql: SQL_JOB_BY_ID,
-    rowMode: 'object',
+    rowMode: "object",
     bind: [param.jobId],
     resultRows: rows,
   });
@@ -349,13 +410,13 @@ function insertJobAndBrowseHistory(param, now) {
         $job_first_publish_datetime: dayjs(
           param.jobFirstPublishDatetime
         ).isValid()
-          ? dayjs(param.jobFirstPublishDatetime).format('YYYY-MM-DD HH:mm:ss')
+          ? dayjs(param.jobFirstPublishDatetime).format("YYYY-MM-DD HH:mm:ss")
           : null,
         $boss_name: param.bossName,
         $boss_company_name: param.bossCompanyName,
         $boss_position: param.bossPosition,
-        $create_datetime: dayjs(now).format('YYYY-MM-DD HH:mm:ss'),
-        $update_datetime: dayjs(now).format('YYYY-MM-DD HH:mm:ss'),
+        $create_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
+        $update_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
       },
     });
   }
@@ -366,60 +427,64 @@ INSERT INTO job_browse_history (job_id,job_visit_datetime,job_visit_type) VALUES
     sql: SQL_INSERT_JOB_BROWSE_HISTORY,
     bind: {
       $job_id: param.jobId,
-      $job_visit_datetime: dayjs(now).format('YYYY-MM-DD HH:mm:ss'),
-      $job_visit_type: 'SEARCH',
+      $job_visit_datetime: dayjs(now).format("YYYY-MM-DD HH:mm:ss"),
+      $job_visit_type: "SEARCH",
     },
   });
 }
 
-const initDb = function (sqlite3) {
-  const capi = sqlite3.capi; // C-style API
-  const oo = sqlite3.oo1; // High-level OO API
+/**
+ *
+ * @param {Sqlite3Static} sqlite3
+ * @returns
+ */
+const initDb = async function (sqlite3) {
+  capi = sqlite3.capi; // C-style API
+  oo = sqlite3.oo1; // High-level OO API
   debugLog(
-    'SQLite3 version',
+    "SQLite3 version",
     capi.sqlite3_libversion(),
     capi.sqlite3_sourceid()
   );
-
-  if ('OpfsDb' in oo) {
-    db = new oo.OpfsDb('/job.sqlite3');
-    debugLog('[DB] The OPFS is available.');
-    debugLog('[DB] Persisted db =', db.filename);
+  if ("OpfsDb" in oo) {
+    db = new oo.OpfsDb(JOB_DB_PATH);
+    debugLog("[DB] The OPFS is available.");
+    debugLog("[DB] Persisted db =" + db.filename);
   } else {
-    db = new oo.DB('/job.sqlite3', 'ct');
-    debugLog('[DB] The OPFS is not available.');
-    debugLog('[DB] transient db =', db.filename);
+    db = new oo.DB(JOB_DB_PATH, "ct");
+    debugLog("[DB] The OPFS is not available.");
+    debugLog("[DB] transient db =" + db.filename);
   }
-  infoLog('[DB] schema checking...');
+  infoLog("[DB] schema checking...");
   let changelogList = getChangeLogList();
   let oldVersion = 0;
   let newVersion = changelogList.length;
   try {
     const SQL_SELECT_SCHEMA_COUNT =
-      'SELECT COUNT(*) AS count FROM sqlite_schema;';
+      "SELECT COUNT(*) AS count FROM sqlite_schema;";
     let schemaCount = 0;
     let schemaCountRow = [];
     db.exec({
       sql: SQL_SELECT_SCHEMA_COUNT,
-      rowMode: 'object',
+      rowMode: "object",
       resultRows: schemaCountRow,
     });
     if (schemaCountRow.length > 0) {
       schemaCount = schemaCountRow[0].count;
     }
-    infoLog('[DB] current schemaCount = ' + schemaCount);
+    infoLog("[DB] current schemaCount = " + schemaCount);
     if (schemaCount == 0) {
-      const SQL_PRAGMA_AUTO_VACUUM = 'PRAGMA auto_vacuum = 1';
+      const SQL_PRAGMA_AUTO_VACUUM = "PRAGMA auto_vacuum = 1";
       db.exec(SQL_PRAGMA_AUTO_VACUUM);
-      infoLog('[DB] execute ' + SQL_PRAGMA_AUTO_VACUUM);
+      infoLog("[DB] execute " + SQL_PRAGMA_AUTO_VACUUM);
     }
   } catch (e) {
-    console.error('[DB] checking schema fail,' + e.message);
+    console.error("[DB] checking schema fail," + e.message);
     return;
   }
   try {
     db.exec({
-      sql: 'BEGIN TRANSACTION',
+      sql: "BEGIN TRANSACTION",
     });
     const SQL_CREATE_TABLE_VERSION = `
     CREATE TABLE IF NOT EXISTS version(
@@ -427,11 +492,11 @@ const initDb = function (sqlite3) {
     )
   `;
     db.exec(SQL_CREATE_TABLE_VERSION);
-    const SQL_QUERY_VERSION = 'SELECT num FROM version';
+    const SQL_QUERY_VERSION = "SELECT num FROM version";
     let rows = [];
     db.exec({
       sql: SQL_QUERY_VERSION,
-      rowMode: 'object',
+      rowMode: "object",
       resultRows: rows,
     });
     if (rows.length > 0) {
@@ -444,27 +509,27 @@ const initDb = function (sqlite3) {
       });
     }
     infoLog(
-      '[DB] schema oldVersion = ' + oldVersion + ', newVersion = ' + newVersion
+      "[DB] schema oldVersion = " + oldVersion + ", newVersion = " + newVersion
     );
     if (newVersion > oldVersion) {
-      infoLog('[DB] schema upgrade start');
+      infoLog("[DB] schema upgrade start");
       for (let i = oldVersion; i < newVersion; i++) {
         let currentVersion = i + 1;
         let changelog = changelogList[i];
         let sqlList = changelog.getSqlList();
         infoLog(
-          '[DB] schema upgrade changelog version = ' +
+          "[DB] schema upgrade changelog version = " +
             currentVersion +
-            ', sql total = ' +
+            ", sql total = " +
             sqlList.length
         );
         for (let seq = 0; seq < sqlList.length; seq++) {
           infoLog(
-            '[DB] schema upgrade changelog version = ' +
+            "[DB] schema upgrade changelog version = " +
               currentVersion +
-              ', execute sql = ' +
+              ", execute sql = " +
               (seq + 1) +
-              '/' +
+              "/" +
               sqlList.length
           );
           let sql = sqlList[seq];
@@ -476,19 +541,19 @@ const initDb = function (sqlite3) {
         sql: SQL_UPDATE_VERSION,
         bind: { $num: newVersion },
       });
-      infoLog('[DB] schema upgrade finish to version = ' + newVersion);
-      infoLog('[DB] current schema version = ' + newVersion);
+      infoLog("[DB] schema upgrade finish to version = " + newVersion);
+      infoLog("[DB] current schema version = " + newVersion);
     } else {
-      infoLog('[DB] skip schema upgrade');
-      infoLog('[DB] current schema version = ' + oldVersion);
+      infoLog("[DB] skip schema upgrade");
+      infoLog("[DB] current schema version = " + oldVersion);
     }
     db.exec({
-      sql: 'COMMIT',
+      sql: "COMMIT",
     });
   } catch (e) {
-    console.error('[DB] schema upgrade fail,' + e.message);
+    console.error("[DB] schema upgrade fail," + e.message);
     db.exec({
-      sql: 'ROLLBACK TRANSACTION',
+      sql: "ROLLBACK TRANSACTION",
     });
   }
 };
@@ -496,11 +561,16 @@ const initDb = function (sqlite3) {
 onmessage = function (e) {
   let message = e.data;
   debugLog(
-    '[worker][receive][offscreen -> worker] message = ' +
-      JSON.stringify(message)
+    "[worker][receive][offscreen -> worker] message [action=" +
+      message.action +
+      ",callbackId=" +
+      message.callbackId +
+      ",error=" +
+      message.error +
+      "]"
   );
   let action = message.action;
-  debugLog('[worker] invoke action = ' + action);
+  debugLog("[worker] invoke action = " + action);
   ACTION_FUNCTION.get(action)(message, message.param);
 };
 
@@ -508,12 +578,17 @@ function postSuccessMessage(message, data) {
   let resultMessage = JSON.parse(JSON.stringify(message));
   resultMessage.data = data;
   postMessage({
-    type: 'db',
+    type: "db",
     data: resultMessage,
   });
   debugLog(
-    '[worker][send][worker -> offscreen] message = ' +
-      JSON.stringify(resultMessage)
+    "[worker][send][worker -> offscreen] message [action=" +
+      message.action +
+      ",callbackId=" +
+      message.callbackId +
+      ",error=" +
+      message.error +
+      "]"
   );
 }
 
@@ -523,11 +598,16 @@ function postErrorMessage(message, error) {
   debugLog(resultMessage);
   resultMessage.error = error;
   postMessage({
-    type: 'db',
+    type: "db",
     data: resultMessage,
   });
   debugLog(
-    '[worker][send][worker -> offscreen] message = ' +
-      JSON.stringify(resultMessage)
+    "[worker][send][worker -> offscreen] message [action=" +
+      message.action +
+      ",callbackId=" +
+      message.callbackId +
+      ",error=" +
+      message.error +
+      "]"
   );
 }

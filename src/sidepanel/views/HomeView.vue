@@ -178,7 +178,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, provide, computed } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useTransition } from "@vueuse/core";
 import { JobApi } from "@/api/index.js";
 import { SearchJobBO } from "@/data/bo/searchJobBO.js";
@@ -223,6 +223,7 @@ const showAdvanceSearch = ref(false);
 const handleSizeChange = (val: number) => {
   search();
 };
+
 const handleCurrentChange = (val: number) => {
   search();
 };
@@ -311,7 +312,7 @@ const search = async () => {
   }
   let searchResult = await JobApi.searchJob(searchParam);
   tableData.value = searchResult.items;
-  total.value = searchResult.total;
+  total.value = parseInt(searchResult.total);
 };
 
 const refreshStatistic = async () => {

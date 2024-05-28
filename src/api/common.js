@@ -10,3 +10,21 @@ export async function initBridge() {
     }, 30000);
   
 }
+
+/**
+ * 
+ * @returns base64 database file
+ */
+export async function dbExport(){
+  let result = await invoke(dbExport.name, {});
+  return result.data;
+}
+
+/**
+ * @param {string} base64 zip file content
+ * @returns bytesToWrite
+ */
+export async function dbImport(param){
+  let result = await invoke(dbImport.name, param);
+  return result.data;
+}

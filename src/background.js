@@ -1,6 +1,6 @@
-import {debugLog} from "./log";
+import { debugLog } from "./log";
 
-debugLog('background ready');
+debugLog("background ready");
 //sidepanel
 chrome.runtime.onInstalled.addListener(() => {
   chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true });
@@ -28,38 +28,65 @@ async function setupOffscreenDocument(path) {
   }
 
   var portInstance;
-  chrome.runtime.onConnect.addListener(function(port) {
+  chrome.runtime.onConnect.addListener(function (port) {
     portInstance = port;
-    port.onMessage.addListener(function(message) {
-      debugLog("[background][receive][content script -> background] message = "+JSON.stringify(message));
-      sendMessageToOffscreen("bridge",message);
-      debugLog("[background][send][background -> offscreen] message = "+JSON.stringify(message));
+    port.onMessage.addListener(function (message) {
+      debugLog(
+        "[background][receive][content script -> background] message [action=" +
+          message.action +
+          ",callbackId=" +
+          message.callbackId +
+          ",error=" +
+          message.error +
+          "]"
+      );
+      sendMessageToOffscreen("bridge", message);
+      debugLog(
+        "[background][send][background -> offscreen] message [action=" +
+          message.action +
+          ",callbackId=" +
+          message.callbackId +
+          ",error=" +
+          message.error +
+          "]"
+      );
     });
   });
 
-  chrome.runtime.onMessage.addListener((event)=>{
+  chrome.runtime.onMessage.addListener((event) => {
     var message = event.data;
-    debugLog("[background][receive][offscreen -> background] message = "+JSON.stringify(message));
+    debugLog(
+      "[background][receive][offscreen -> background] message [action=" +
+        message.action +
+        ",callbackId=" +
+        message.callbackId +
+        ",error=" +
+        message.error +
+        "]"
+    );
     sendMessageToContentScript(message);
-    debugLog("[background][send][background -> content script] message = "+JSON.stringify(message));
+    debugLog(
+      "[background][send][background -> content script] message [action=" +
+        message.action +
+        ",callbackId=" +
+        message.callbackId +
+        ",error=" +
+        message.error +
+        "]"
+    );
   });
 
-  function sendMessageToContentScript(message){
+  function sendMessageToContentScript(message) {
     portInstance.postMessage(message);
   }
 
-  function sendMessageToOffscreen(type,data){
+  function sendMessageToOffscreen(type, data) {
     chrome.runtime.sendMessage({
       type,
-      target: 'offscreen',
-      data
+      target: "offscreen",
+      data,
     });
-  };
-
+  }
 }
 
 setupOffscreenDocument("offscreen.html");
-
-
-
-
