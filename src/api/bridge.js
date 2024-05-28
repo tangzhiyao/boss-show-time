@@ -1,8 +1,9 @@
 import { getRandomInt } from "../utils";
 import { debugLog } from "../log";
+import { CONTENT_SCRIPT, BACKGROUND } from "@/api/bridgeCommon.js";
 
 const callbackPromiseHookMap = new Map();
-var seq = 0;
+let seq = 0;
 
 /**
  *
@@ -11,34 +12,22 @@ var seq = 0;
  * @returns
  */
 export function invoke(action, param) {
-  var promise = new Promise((resolve, reject) => {
-    var callbackId = genCallbackId();
+  let promise = new Promise((resolve, reject) => {
+    let callbackId = genCallbackId();
     addCallbackPromiseHook(callbackId, { resolve, reject });
-    var message = { action, callbackId, param };
-    var portInstance = chrome.runtime.connect({ name: "bridge" });
-    portInstance.onMessage.addListener(function (message) {
-      //message = {action,callbackId,param,data,error}
-      var promiseHook = getAndRemovePromiseHook(message.callbackId);
-      if (message.error) {
-        message.message = message.error;
-        promiseHook.reject(message);
-      } else {
-        promiseHook.resolve(message);
-      }
-      debugLog(
-        "[content script][receive][background -> content script] message [action=" +
-          message.action +
-          ",callbackId=" +
-          message.callbackId +
-          ",error=" +
-          message.error +
-          "]"
-      );
-      portInstance.disconnect();
-    });
-    portInstance.postMessage(message);
+    let message = {
+      action,
+      callbackId,
+      param,
+      from: CONTENT_SCRIPT,
+      to: BACKGROUND,
+    };
     debugLog(
-      "[content script][send][content script -> background] message [action=" +
+      "1.[content script][send][" +
+        message.from +
+        " -> " +
+        message.to +
+        "] message [action=" +
         message.action +
         ",callbackId=" +
         message.callbackId +
@@ -46,8 +35,38 @@ export function invoke(action, param) {
         message.error +
         "]"
     );
+    chrome.runtime.sendMessage(message);
   });
   return promise;
+}
+
+export function init() {
+  chrome.runtime.onMessage.addListener(function (result, sender, sendResponse) {
+    let message = result;
+    if (message.from == BACKGROUND && message.to == CONTENT_SCRIPT) {
+      //message = {action,callbackId,param,data,error}
+      debugLog(
+        "12.[content script][receive][" +
+          message.from +
+          " -> " +
+          message.to +
+          "] message [action=" +
+          message.action +
+          ",callbackId=" +
+          message.callbackId +
+          ",error=" +
+          message.error +
+          "]"
+      );
+      let promiseHook = getAndRemovePromiseHook(message.callbackId);
+      if (message.error) {
+        message.message = message.error;
+        promiseHook.reject(message);
+      } else {
+        promiseHook.resolve(message);
+      }
+    }
+  });
 }
 
 function addCallbackPromiseHook(callbackId, promiseHook) {
@@ -55,19 +74,11 @@ function addCallbackPromiseHook(callbackId, promiseHook) {
 }
 
 function getAndRemovePromiseHook(callbackId) {
-  var promiseHook = callbackPromiseHookMap.get(callbackId);
+  let promiseHook = callbackPromiseHookMap.get(callbackId);
   callbackPromiseHookMap.delete(callbackId);
   return promiseHook;
 }
 
 function genCallbackId() {
   return new Date().getTime() + seq + getRandomInt(1000);
-}
-
-export class Message {
-  action;
-  callbackId;
-  param;
-  error;
-  data;
 }

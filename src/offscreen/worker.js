@@ -1,7 +1,7 @@
 import { infoLog, debugLog } from "../log";
 import sqlite3InitModule, { Sqlite3Static } from "@sqlite.org/sqlite-wasm";
 import { Job } from "@/data/domain/job";
-import { Message } from "../api/bridge";
+import { Message } from "../api/message";
 import dayjs from "dayjs";
 import { JobDTO } from "@/data/dto/jobDTO";
 import { toHump } from "../utils";
@@ -12,6 +12,7 @@ import { SearchJobBO } from "@/data/bo/pageBO";
 import { SearchJobDTO } from "@/data/dto/searchJobDTO";
 import { bytesToBase64, base64ToBytes } from "@/utils/base64.js";
 import JSZip from "jszip";
+import { OFFSCREEN, WEB_WORKER } from "../api/bridgeCommon";
 
 debugLog("worker ready");
 
@@ -356,7 +357,7 @@ export const WorkerBridge = {
       try {
         dbContent = await zipContent.file(JOB_DB_FILE_NAME).async("uint8array");
       } catch (e) {
-        postErrorMessage(message, "file: "+JOB_DB_FILE_NAME+" not found");
+        postErrorMessage(message, "file: " + JOB_DB_FILE_NAME + " not found");
         return;
       }
       let bytesToWrite = await oo.OpfsDb.importDb(JOB_DB_FILE_NAME, dbContent);
@@ -560,29 +561,37 @@ const initDb = async function (sqlite3) {
 
 onmessage = function (e) {
   let message = e.data;
-  debugLog(
-    "[worker][receive][offscreen -> worker] message [action=" +
-      message.action +
-      ",callbackId=" +
-      message.callbackId +
-      ",error=" +
-      message.error +
-      "]"
-  );
-  let action = message.action;
-  debugLog("[worker] invoke action = " + action);
-  ACTION_FUNCTION.get(action)(message, message.param);
+  if (message) {
+    if (message.from == OFFSCREEN && message.to == WEB_WORKER) {
+      debugLog(
+        "6.[worker][receive][" +
+          message.from +
+          " -> " +
+          message.to +
+          "] message [action=" +
+          message.action +
+          ",callbackId=" +
+          message.callbackId +
+          ",error=" +
+          message.error +
+          "]"
+      );
+      let action = message.action;
+      debugLog("[worker] invoke action = " + action);
+      ACTION_FUNCTION.get(action)(message, message.param);
+    }
+  }
 };
 
 function postSuccessMessage(message, data) {
-  let resultMessage = JSON.parse(JSON.stringify(message));
-  resultMessage.data = data;
-  postMessage({
-    type: "db",
-    data: resultMessage,
-  });
+  message.from = WEB_WORKER;
+  message.to = OFFSCREEN;
   debugLog(
-    "[worker][send][worker -> offscreen] message [action=" +
+    "7.[worker][send][" +
+      message.from +
+      " -> " +
+      message.to +
+      "] message [action=" +
       message.action +
       ",callbackId=" +
       message.callbackId +
@@ -590,24 +599,34 @@ function postSuccessMessage(message, data) {
       message.error +
       "]"
   );
+  let resultMessage = JSON.parse(JSON.stringify(message));
+  resultMessage.data = data;
+  postMessage({
+    data: resultMessage,
+  });
 }
 
 function postErrorMessage(message, error) {
+  message.from = WEB_WORKER;
+  message.to = OFFSCREEN;
+  debugLog(
+    "7.[worker][send][" +
+      message.from +
+      " -> " +
+      message.to +
+      "] message [action=" +
+      message.action +
+      ",callbackId=" +
+      message.callbackId +
+      ",error=" +
+      message.error +
+      "]"
+  );
   infoLog(error);
   let resultMessage = JSON.parse(JSON.stringify(message));
   debugLog(resultMessage);
   resultMessage.error = error;
   postMessage({
-    type: "db",
     data: resultMessage,
   });
-  debugLog(
-    "[worker][send][worker -> offscreen] message [action=" +
-      message.action +
-      ",callbackId=" +
-      message.callbackId +
-      ",error=" +
-      message.error +
-      "]"
-  );
 }

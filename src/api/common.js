@@ -1,21 +1,15 @@
-import { invoke } from './bridge';
+import { invoke, init } from "./bridge";
 
 export async function initBridge() {
-
-    await invoke('init', {});
-    //keep chrome extension background alive
-    //ping each 30s
-    setInterval(function () {
-      invoke('ping', {});
-    }, 30000);
-  
+  init();
+  await invoke("init", {});
 }
 
 /**
- * 
+ *
  * @returns base64 database file
  */
-export async function dbExport(){
+export async function dbExport() {
   let result = await invoke("dbExport", {});
   return result.data;
 }
@@ -24,7 +18,7 @@ export async function dbExport(){
  * @param {string} base64 zip file content
  * @returns bytesToWrite
  */
-export async function dbImport(param){
+export async function dbImport(param) {
   let result = await invoke("dbImport", param);
   return result.data;
 }
