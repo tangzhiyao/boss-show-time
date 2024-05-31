@@ -16,6 +16,30 @@ export function createLink(href) {
     link.setAttribute('crossorigin', 'anonymous');
     return link;
 }
+
+
+export function createOtherLink(keyword) {
+    const decode = encodeURIComponent(keyword)
+    const dom = document.createElement('div');
+    dom.className = '__company_info';
+
+    dom.innerHTML = `
+        公司信息查询：
+        <a class="__company_info_name" href='https://www.xiaohongshu.com/search_result?keyword=${decode}' target="_blank" rel="noopener noreferrer">
+            小红书
+        </a>
+        &nbsp; | &nbsp;
+        <a class="__company_info_name" href='https://maimai.cn/web/search_center?type=feed&query=${decode}&highlight=true' target="_blank" rel="noopener noreferrer">
+            脉脉
+        </a>
+        &nbsp; | &nbsp;
+        <a class="__company_info_name" href='https://www.baidu.com/s?wd=${decode}' target="_blank" rel="noopener noreferrer">
+            百度
+        </a>
+    `
+
+    return dom
+}
  
  
 // 转换时间

@@ -3,6 +3,7 @@
 import { setupSortJobItem,renderSortJobItem } from "../../commonRender";
 import { createDOM } from './index';
 import { mutationContainer, getListValue } from './index'
+import { createOtherLink } from '../../utils'
 // 首次打开页面时是服务端渲染，没法监听接口，但是 html 中保存了列表数据
 export default function firstOpen(data) {
     mutationContainer().then(dom => {
@@ -20,6 +21,7 @@ export default function firstOpen(data) {
                 
                 let tag = createDOM(createTime, companyShortName); 
                 dom.appendChild(tag);
+                dom.appendChild(createOtherLink(companyShortName));
             });
             renderSortJobItem(list, (index)=>{
                 return children?.[index];

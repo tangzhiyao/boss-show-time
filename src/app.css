@@ -46,6 +46,21 @@
     
 }
 
+.__company_info {
+    padding: 8px;
+    font-size: 14px;
+    color: #414a60;
+    a {
+        font-size: 14px;
+        color: #414a60;
+    }
+
+    a:hover {
+        background-color: yellowgreen;;
+        color: white;
+    }
+}
+
 .__rencent_update {
     color: red;
 }

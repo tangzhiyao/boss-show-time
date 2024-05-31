@@ -5,7 +5,7 @@ import {
   renderSortJobItem,
   renderTimeLoadingTag,
 } from "../../commonRender";
-import { delay } from "../../utils";
+import { delay, createOtherLink } from "../../utils";
 import onlineFilter from "./onlineFilter";
 
 const DELAY_FETCH_TIME = 100; //ms
@@ -98,13 +98,15 @@ function parseBossData(list, getListItem) {
             const dom = getListItem(itemId);
             let tag = createDOM(time, brandName);
             dom.appendChild(tag);
-
+            dom.appendChild(createOtherLink(brandName.replace('...', '')));
+            
             return item;
         });
           
         renderSortJobItem(newList, getListItem, 'lastModifyTime');
     })
-    .catch(() => {
+    .catch((err) => {
+        console.log('boss-show-time-error',err)
       list.forEach((item) => {
         const { itemId, lastModifyTime, brandName } = item;
         const dom = getListItem(itemId);

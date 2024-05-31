@@ -1,5 +1,5 @@
 import { renderTimeTag,setupSortJobItem,renderSortJobItem  } from "../../commonRender";
-
+import { createOtherLink } from '../../utils'
 export function getJob51Data(responseText) {
     try {
         const data = JSON.parse(responseText);
@@ -49,6 +49,8 @@ function parseData(list, getListItem) {
         const dom = getListItem(index);
         let tag = createDOM(updateDateTime, companyName); 
         dom.appendChild(tag);
+        dom.appendChild(createOtherLink(companyName));
+
     });
     renderSortJobItem(list, getListItem, 'updateDateTime');
 }
