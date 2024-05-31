@@ -107,3 +107,8 @@ export function toHump(name) {
 export function toLine(name) {
   return name.replace(/([A-Z])/g,"_$1").toLowerCase();
 }
+
+// 写一个 sleep 函数
+export function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}   

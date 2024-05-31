@@ -6,7 +6,6 @@ import {
   createLoadingDOM,
   hiddenLoadingDOM,
 } from "../../commonRender";
-import { getRandomInt } from "../../utils";
 import onlineFilter from "./onlineFilter";
 import {
   JOB_STATUS_DESC_NEWEST,
@@ -14,11 +13,11 @@ import {
   JOB_STATUS_DESC_UNKNOW,
 } from "../../common";
 import { PLATFORM_BOSS } from "../../common";
-import { saveBrowseJob,getJobIds } from "../../commonDataHandler";
-import { JobApi} from "../../api"
+import { saveBrowseJob, getJobIds } from "../../commonDataHandler";
+import { JobApi } from "../../api";
+import { delay } from "../../utils";
 
 const DELAY_FETCH_TIME = 75; //ms
-const DELAY_FETCH_TIME_RANDOM_OFFSET = 50; //ms
 
 export function getBossData(responseText) {
   try {
@@ -91,101 +90,90 @@ function parseBossData(list, getListItem) {
       securityId;
     apiUrlList.push(pureJobItemDetailApiUrl);
     //jobUrl
-    const jobItemDetailUrl = dom.querySelector(".job-card-body").querySelector(".job-card-left").href;
+    const jobItemDetailUrl = dom
+      .querySelector(".job-card-body")
+      .querySelector(".job-card-left").href;
     const url = new URL(jobItemDetailUrl);
     let pureJobItemDetailUrl = url.origin + url.pathname;
     urlList.push(pureJobItemDetailUrl);
 
-    let loadingLastModifyTimeTag = createLoadingDOM(brandName,"__boss_time_tag");
+    let loadingLastModifyTimeTag = createLoadingDOM(
+      brandName,
+      "__boss_time_tag"
+    );
     dom.appendChild(loadingLastModifyTimeTag);
   });
-  let promiseList = [];
-  apiUrlList.forEach(async (url, index) => {
-    const delay = (
-      ms = DELAY_FETCH_TIME * index +
-        getRandomInt(DELAY_FETCH_TIME_RANDOM_OFFSET)
-    ) => new Promise((r) => setTimeout(r, ms));
-    await delay();
-    const promise = new Promise(async (resolve, reject) => {
-      try {
-        const response = await fetch(url);
-        const result = await response.json();
-        resolve(result);
-      } catch (e) {
-        reject(e);
-      }
-    });
-    promiseList.push(promise);
-    if (index == apiUrlList.length - 1) {
-      const lastModifyTimeList = [];
-      const jobStatusDescList = [];
-      const jobDesc = [];
-      var jobDTOList = [];
-      Promise.allSettled(promiseList)
-        .then( async (jsonList) => {
-          jsonList.forEach((item,index) => {
-            item.value.zpData.jobInfo.jobUrl = urlList[index];
-          })
-          
-          await saveBrowseJob(jsonList,PLATFORM_BOSS);
-          jobDTOList = await JobApi.getJobBrowseInfoByIds(getJobIds(jsonList,PLATFORM_BOSS));
-          jsonList.forEach((item) => {
-            lastModifyTimeList.push(
-              dayjs(item.value?.zpData?.brandComInfo?.activeTime)
-            );
-            jobStatusDescList.push(
-              convertJobStatusDesc(item.value?.zpData?.jobInfo?.jobStatusDesc)
-            );
-            jobDesc.push(item.value?.zpData?.jobInfo?.postDescription);
-          });
-          list.forEach((item, index) => {
-            item["lastModifyTime"] = lastModifyTimeList[index];
-            item["jobStatusDesc"] = jobStatusDescList[index];
-            item["postDescription"] = jobDesc[index];
-            item["firstBrowseDatetime"] = jobDTOList[index].createDatetime;
-          });
-          list.forEach((item,index) => {
-            const {
-              itemId,
-              lastModifyTime,
-              brandName,
-              jobStatusDesc,
-              postDescription,
-            } = item;
-            const dom = getListItem(itemId);
-            let tag = createDOM(
-              lastModifyTime,
-              brandName,
-              jobStatusDesc,
-              postDescription,
-              jobDTOList[index]
-            );
-            dom.appendChild(tag);
-          });
-          hiddenLoadingDOM();
-          renderSortJobItem(list, getListItem);
-        })
-        .catch((error) => {
-          console.log(error);
-          list.forEach((item) => {
-            const { itemId, lastModifyTime, brandName } = item;
-            const dom = getListItem(itemId);
-            let tag = createDOM(lastModifyTime, brandName,null,null,jobDTOList[index]);
-            dom.appendChild(tag);
-          });
-          hiddenLoadingDOM();
-        });
-    }
+  const promiseList = apiUrlList.map(async (url, index) => {
+    await delay(DELAY_FETCH_TIME * index); // 避免频繁请求触发风控
+    const response = await fetch(url);
+    const result = await response.json();
+    return result;
   });
+  Promise.allSettled(promiseList)
+    .then(async (jsonList) => {
+      jsonList.forEach((item, index) => {
+        item.value.zpData.jobInfo.jobUrl = urlList[index];
+      });
+      await saveBrowseJob(jsonList, PLATFORM_BOSS);
+      const jobDTOList = await JobApi.getJobBrowseInfoByIds(
+        getJobIds(jsonList, PLATFORM_BOSS)
+      );
+      list.forEach((item, index) => {
+        item["lastModifyTime"] = jsonList?.[index]
+          ? dayjs(jsonList[index].value?.zpData?.brandComInfo?.activeTime)
+          : undefined;
+        item["jobStatusDesc"] = jsonList?.[index]
+          ? jsonList[index].value?.zpData?.jobInfo?.jobStatusDesc
+          : undefined;
+        item["postDescription"] = jsonList?.[index]
+          ? jsonList[index].value?.zpData?.jobInfo?.postDescription
+          : undefined;
+        item["firstBrowseDatetime"] = jobDTOList[index].createDatetime;
+        const {
+          itemId,
+          lastModifyTime,
+          brandName,
+          jobStatusDesc,
+          postDescription,
+        } = item;
+        const dom = getListItem(itemId);
+        let tag = createDOM(
+          lastModifyTime,
+          brandName,
+          jobStatusDesc,
+          postDescription,
+          jobDTOList[index]
+        );
+        dom.appendChild(tag);
+      });
+      hiddenLoadingDOM();
+      renderSortJobItem(list, getListItem);
+    })
+    .catch((error) => {
+      console.log(error);
+      list.forEach((item) => {
+        const { itemId, lastModifyTime, brandName } = item;
+        const dom = getListItem(itemId);
+        let tag = createDOM(lastModifyTime, brandName, null, null, null);
+        dom.appendChild(tag);
+      });
+      hiddenLoadingDOM();
+    });
 }
 
-function createDOM(lastModifyTime, brandName, jobStatusDesc, postDescription,jobDTO) {
+function createDOM(
+  lastModifyTime,
+  brandName,
+  jobStatusDesc,
+  postDescription,
+  jobDTO
+) {
   const div = document.createElement("div");
   div.classList.add("__boss_time_tag");
   renderTimeTag(div, lastModifyTime, brandName, {
     jobStatusDesc: jobStatusDesc,
     jobDesc: postDescription,
-    jobDTO: jobDTO
+    jobDTO: jobDTO,
   });
   return div;
 }
