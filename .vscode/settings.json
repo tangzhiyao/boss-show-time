@@ -1,0 +1,15 @@
+{
+    //see https://solomonvictorino.com/reload-chrome-extensions-on-save-vs-code/
+    //下面为优化方案，重新加载所有扩展,不会失去当前编辑窗口的焦点，
+    //在Chrome安装插件Extensions Reloader(https://chromewebstore.google.com/detail/extensions-reloader/fimgfedafeadlieiabdeeaodndnlbhid)
+    //执行Alt+Shift+R（效果：重新加载chrome扩展）【前提跳转到chrome://extensions/shortcuts的Extensions Reloader下设置Reload all extensions in development为Global】
+    //下面为Windows下的设置（其他系统未测试）
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "src\\\\.*",
+                "cmd": "powershell -Command \"$wshell = New-Object -ComObject wscript.shell;$wshell.SendKeys('%+R')\""
+            }
+        ]
+    }
+}
