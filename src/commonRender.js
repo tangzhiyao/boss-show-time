@@ -20,27 +20,29 @@ export function renderTimeTag(
   //jobStatusDesc
   if (jobStatusDesc) {
     statusTag = document.createElement('span');
-    var statusToTimeText = '';
     if (jobStatusDesc == JOB_STATUS_DESC_NEWEST) {
-      statusToTimeText = '一周内';
+      let statusToTimeText = '一周内';
       statusTag.innerHTML = '【 ' + statusToTimeText + '发布❔】';
       statusTag.title =
         '当前招聘状态【' +
         jobStatusDesc.label +
         '】，招聘状态：最新：代表一周内发布；招聘中：代表发布时间超过一周';
-      statusTag.classList.add('__time_tag_base_text_font');
-      divElement.appendChild(statusTag);
+    }else{
+      statusTag.innerHTML = '【' + "未找到更新时间" + '】';
     }
-  }
-  //firstPublishTime
-  if (firstPublishTime) {
-    var firstPublishTimeTag = document.createElement('span');
-    var firstPublishTimeHumanReadable =
-      convertTimeToHumanReadable(firstPublishTime);
-    firstPublishTimeTag.innerHTML +=
-      '【' + firstPublishTimeHumanReadable + '发布】';
-    firstPublishTimeTag.classList.add('__time_tag_base_text_font');
-    divElement.appendChild(firstPublishTimeTag);
+    statusTag.classList.add('__time_tag_base_text_font');
+    divElement.appendChild(statusTag);
+  }else{
+    //firstPublishTime
+    if (firstPublishTime) {
+      var firstPublishTimeTag = document.createElement('span');
+      var firstPublishTimeHumanReadable =
+        convertTimeToHumanReadable(firstPublishTime);
+      firstPublishTimeTag.innerHTML +=
+        '【' + firstPublishTimeHumanReadable + '发布】';
+      firstPublishTimeTag.classList.add('__time_tag_base_text_font');
+      divElement.appendChild(firstPublishTimeTag);
+    }
   }
   //companyInfo
   var companyInfoTag = null;
@@ -64,7 +66,7 @@ export function renderTimeTag(
     firstBrowseTimeTag.innerHTML +=
       '【' +
       firstBrowseTimeHumanReadable +
-      '看过(共' +
+      '展示过(共' +
       jobDTO.browseCount +
       '次)】';
     firstBrowseTimeTag.classList.add('__time_tag_base_text_font');
