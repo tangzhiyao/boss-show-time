@@ -9,6 +9,16 @@
         "48": "icons/icon.jpg",
         "128": "icons/icon.jpg"
     },
+    "background": {
+        "service_worker": "background.js",
+        "type": "module"
+    },
+    "action": {
+        "default_title": "Click to open panel"
+    },
+    "content_security_policy": {
+        "extension_pages": "script-src 'self' 'wasm-unsafe-eval'"
+    },
     "content_scripts": [
         {
             "js": ["app.js"],
@@ -31,8 +41,14 @@
             ]
         }
     ],
+    "side_panel": {
+        "default_path": "sidepanel.html"
+      },
     "permissions": [
-        "webRequest"
+        "webRequest",
+        "offscreen",
+        "sidePanel",
+        "unlimitedStorage"
     ],
     "host_permissions": [
         "https://www.zhipin.com/*",
