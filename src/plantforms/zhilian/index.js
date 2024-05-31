@@ -1,5 +1,5 @@
 import { renderTimeTag,setupSortJobItem,renderSortJobItem } from "../../commonRender";
-
+import { createOtherLink } from "../../utils";
 export function getZhiLianData(responseText) {
     try {
         const data = JSON.parse(responseText);
@@ -49,6 +49,7 @@ function parseZhiPinData(list, getListItem) {
         const dom = getListItem(index);
         let tag = createDOM(firstPublishTime, companyName); 
         dom.appendChild(tag);
+        dom.appendChild(createOtherLink(companyName));
     });
     renderSortJobItem(list, getListItem, 'firstPublishTime');
 }

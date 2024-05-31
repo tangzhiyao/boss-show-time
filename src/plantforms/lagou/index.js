@@ -1,6 +1,5 @@
 import { renderTimeTag, setupSortJobItem, renderSortJobItem } from "../../commonRender";
-import { debounce } from '../../utils';
-
+import { debounce, createOtherLink } from '../../utils';
 export function getListValue(data = {}) {
     return [
         'content',
@@ -62,6 +61,7 @@ function parseLaGouData(list, getListItem) {
         const dom = getListItem(index);
         let tag = createDOM(createTime, companyShortName); 
         dom.appendChild(tag);
+        dom.appendChild(createOtherLink(companyShortName));
     });
     renderSortJobItem(list, getListItem, 'createTime');
 }
