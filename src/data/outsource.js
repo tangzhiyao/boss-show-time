@@ -325,9 +325,12 @@ const data = [
   "海南钦诚",
   "信必优Symbio",
   "成都信必优信息技术有限公司",
-  "上海仁联"
+  "上海仁联",
+  "中电金信",
+  "极联股份",
+  "启迪万众"
 ];
 
 export function isOutsource(brandName) {
-  return data.filter((item) => item.includes(brandName)).length > 0;
+  return data.filter((item) => (item.includes(brandName) || brandName.includes(item))).length > 0;
 }

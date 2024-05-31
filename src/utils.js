@@ -78,10 +78,36 @@ export function convertTimeToHumanReadable(dateTime) {
 
 }
 
-// 写一个 sleep 函数
-export function delay(ms) {
-    return new Promise((resolve) => setTimeout(resolve, ms));
-}   
+export function convertTimeOffsetToHumanReadable(dateTime) {
+    let date = dayjs(dateTime);
+    let curDate = dayjs();
+	
+	// 计算时间差共有多少个分钟
+	let minC = curDate.diff(date, 'minute', true);
+	// 计算时间差共有多少个小时
+	let hourC = curDate.diff(date, 'hour', true);
+	// 计算时间差共有多少个天
+	let dayC = curDate.diff(date, 'day', true);
+	// 计算时间差共有多少个月
+	let monthC = curDate.diff(date, 'month', true);
+    
+    if(minC < 1){
+        return `刚刚`;
+    }else if (minC < 60) {
+        return `${parseInt(minC)}分钟前`;
+    } else if (hourC < 24) {
+        return `${parseInt(hourC)}小时前`;
+    } else if (monthC < 1) {
+        return `${parseInt(dayC)}天前`
+    } else {
+        return `${parseInt(monthC)}月前`
+    }
+
+}
+
+export function getRandomInt(max) {
+    return Math.floor(Math.random() * max);
+}
  
 export function debounce(fn, delay) {
     let timer = null;
@@ -95,7 +121,18 @@ export function debounce(fn, delay) {
     }
 }
 
-export function getRandomInt(max) {
-    return Math.floor(Math.random() * max);
+// 下划线转换驼峰
+export function toHump(name) {
+    return name.replace(/\_(\w)/g, function(all, letter){
+        return letter.toUpperCase();
+    });
+}
+// 驼峰转换下划线
+export function toLine(name) {
+  return name.replace(/([A-Z])/g,"_$1").toLowerCase();
 }
 
+// 写一个 sleep 函数
+export function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}   

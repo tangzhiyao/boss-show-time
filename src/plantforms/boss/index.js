@@ -3,12 +3,21 @@ import {
   renderTimeTag,
   setupSortJobItem,
   renderSortJobItem,
-  renderTimeLoadingTag,
+  createLoadingDOM,
+  hiddenLoadingDOM,
 } from "../../commonRender";
 import { delay, createOtherLink } from "../../utils";
 import onlineFilter from "./onlineFilter";
+import {
+  JOB_STATUS_DESC_NEWEST,
+  JOB_STATUS_DESC_RECRUITING,
+  JOB_STATUS_DESC_UNKNOW,
+} from "../../common";
+import { PLATFORM_BOSS } from "../../common";
+import { saveBrowseJob, getJobIds } from "../../commonDataHandler";
+import { JobApi } from "../../api";
 
-const DELAY_FETCH_TIME = 100; //ms
+const DELAY_FETCH_TIME = 75; //ms
 
 export function getBossData(responseText) {
   try {
@@ -35,7 +44,7 @@ function getListByNode(node) {
 function mutationContainer() {
   return new Promise((resolve, reject) => {
     const dom = document.querySelector(".search-job-result");
-    const observer = new MutationObserver(function (childList) {
+    const observer = new MutationObserver(function (childList, obs) {
       (childList || []).forEach((item) => {
         const { addedNodes } = item;
         if (addedNodes && addedNodes.length > 0) {
@@ -58,86 +67,114 @@ function mutationContainer() {
   });
 }
 
+function convertJobStatusDesc(statusText) {
+  if (statusText == JOB_STATUS_DESC_NEWEST.key) {
+    return JOB_STATUS_DESC_NEWEST;
+  } else if (statusText == JOB_STATUS_DESC_RECRUITING.key) {
+    return JOB_STATUS_DESC_RECRUITING;
+  } else {
+    return JOB_STATUS_DESC_UNKNOW;
+  }
+}
+
 // 解析数据，插入时间标签
 function parseBossData(list, getListItem) {
-    const urlList = list.map((item) => {
-        const { itemId, brandName, securityId } = item;
+  const apiUrlList = [];
+  const urlList = [];
+  list.forEach((item) => {
+    const { itemId, brandName, securityId } = item;
+    const dom = getListItem(itemId);
+    //apiUrl
+    var pureJobItemDetailApiUrl =
+      "https://www.zhipin.com/wapi/zpgeek/job/detail.json?securityId=" +
+      securityId;
+    apiUrlList.push(pureJobItemDetailApiUrl);
+    //jobUrl
+    const jobItemDetailUrl = dom
+      .querySelector(".job-card-body")
+      .querySelector(".job-card-left").href;
+    const url = new URL(jobItemDetailUrl);
+    let pureJobItemDetailUrl = url.origin + url.pathname;
+    urlList.push(pureJobItemDetailUrl);
+
+    let loadingLastModifyTimeTag = createLoadingDOM(
+      brandName,
+      "__boss_time_tag"
+    );
+    dom.appendChild(loadingLastModifyTimeTag);
+  });
+  const promiseList = apiUrlList.map(async (url, index) => {
+    await delay(DELAY_FETCH_TIME * index); // 避免频繁请求触发风控
+    const response = await fetch(url);
+    const result = await response.json();
+    return result;
+  });
+  Promise.allSettled(promiseList)
+    .then(async (jsonList) => {
+      jsonList.forEach((item, index) => {
+        item.value.zpData.jobInfo.jobUrl = urlList[index];
+      });
+      await saveBrowseJob(jsonList, PLATFORM_BOSS);
+      const jobDTOList = await JobApi.getJobBrowseInfoByIds(
+        getJobIds(jsonList, PLATFORM_BOSS)
+      );
+      list.forEach((item, index) => {
+        item["lastModifyTime"] = jsonList?.[index]
+          ? dayjs(jsonList[index].value?.zpData?.brandComInfo?.activeTime)
+          : undefined;
+        item["jobStatusDesc"] = jsonList?.[index]
+          ? jsonList[index].value?.zpData?.jobInfo?.jobStatusDesc
+          : undefined;
+        item["postDescription"] = jsonList?.[index]
+          ? jsonList[index].value?.zpData?.jobInfo?.postDescription
+          : undefined;
+        item["firstBrowseDatetime"] = jobDTOList[index].createDatetime;
+        const {
+          itemId,
+          lastModifyTime,
+          brandName,
+          jobStatusDesc,
+          postDescription,
+        } = item;
         const dom = getListItem(itemId);
-        var pureJobItemDetailUrl =
-        "https://www.zhipin.com/wapi/zpgeek/job/detail.json?securityId=" + securityId;
-        let loadingLastModifyTimeTag = createLoadingDOM(brandName);
-        dom.appendChild(loadingLastModifyTimeTag);
-        return pureJobItemDetailUrl;
+        let tag = createDOM(
+          lastModifyTime,
+          brandName,
+          jobStatusDesc,
+          postDescription,
+          jobDTOList[index]
+        );
+        dom.appendChild(tag);
+        dom.appendChild(createOtherLink(brandName.replace('...', '')));
     });
-
-    const promiseList = urlList.map(async (url, index) => {
-        await delay(DELAY_FETCH_TIME * index); // 避免频繁请求触发风控
-        const response = await fetch(url);
-        const result = await response.json();
-        return result
-    });
-
-    Promise.allSettled(promiseList)
-    .then((jsonList) => {
-        let hasShowTag = localStorage.getItem('__boss_show_time_alert');
-        if(!hasShowTag) {
-            localStorage.setItem('__boss_show_time_alert', true);
-            alert('目前仅提供一周内的时间显示！！！');
-        }
-
-        const newList = list.map((item, index) => {
-            const jsonItem = jsonList[index];
-            const { itemId, brandName } = item;
-            const currentTime = dayjs();
-            // 最新： 7天内发布； 招聘中： 7天之前；
-            let time;
-            if(jsonItem.status === 'fulfilled') {
-                time = jsonItem.value?.zpData?.jobInfo?.jobStatusDesc === '最新' ? currentTime.subtract(7, 'day') : undefined
-            }
-            item.lastModifyTime = time;
-            const dom = getListItem(itemId);
-            let tag = createDOM(time, brandName);
-            dom.appendChild(tag);
-            dom.appendChild(createOtherLink(brandName.replace('...', '')));
-            
-            return item;
-        });
-          
-        renderSortJobItem(newList, getListItem, 'lastModifyTime');
+      hiddenLoadingDOM();
+      renderSortJobItem(list, getListItem);
     })
-    .catch((err) => {
-        console.log('boss-show-time-error',err)
+    .catch((error) => {
+      console.log(error);
       list.forEach((item) => {
         const { itemId, lastModifyTime, brandName } = item;
         const dom = getListItem(itemId);
-        let tag = createDOM(lastModifyTime, brandName);
+        let tag = createDOM(lastModifyTime, brandName, null, null, null);
         dom.appendChild(tag);
       });
-    }).finally(() => {
-        hiddenLoadingDOM();
+      hiddenLoadingDOM();
     });
 }
 
-function createDOM(lastModifyTime, brandName) {
+function createDOM(
+  lastModifyTime,
+  brandName,
+  jobStatusDesc,
+  postDescription,
+  jobDTO
+) {
   const div = document.createElement("div");
   div.classList.add("__boss_time_tag");
-  renderTimeTag(div, lastModifyTime, brandName);
+  renderTimeTag(div, lastModifyTime, brandName, {
+    jobStatusDesc: jobStatusDesc,
+    jobDesc: postDescription,
+    jobDTO: jobDTO,
+  });
   return div;
-}
-
-function createLoadingDOM(brandName) {
-  const div = document.createElement("div");
-  div.classList.add("__boss_time_tag");
-  div.classList.add("__loading_tag");
-  renderTimeLoadingTag(div, brandName);
-  return div;
-}
-
-function hiddenLoadingDOM() {
-  var loadingTagList = document.querySelectorAll(".__loading_tag");
-  if (loadingTagList) {
-    loadingTagList.forEach((item) => {
-      item.style = "visibility: hidden;";
-    });
-  }
 }
