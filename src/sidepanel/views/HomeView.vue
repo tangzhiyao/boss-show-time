@@ -1,10 +1,10 @@
 <template>
   <el-row v-loading="loading">
     <el-col :span="8">
-      <el-statistic title="今天浏览" :value="todayBrowseCount" />
+      <el-statistic title="今天职位扫描次数" :value="todayBrowseCount" />
     </el-col>
     <el-col :span="8">
-      <el-statistic title="总浏览数" :value="totalBrowseCount" />
+      <el-statistic title="职位扫描总数" :value="totalBrowseCount" />
     </el-col>
     <el-col :span="8">
       <el-statistic title="总岗位数" :value="totalJobCount" />
@@ -49,8 +49,8 @@
           <el-date-picker
             type="daterange"
             range-separator="到"
-            start-placeholder="首次浏览开始时间"
-            end-placeholder="首次浏览结束时间"
+            start-placeholder="首次扫描开始时间"
+            end-placeholder="首次扫描结束时间"
             v-model="jobSearchDatetime"
             clearable
             @change="onClickSearch"
@@ -133,12 +133,12 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="createDatetime" label="首次浏览日期" width="110">
+      <el-table-column prop="createDatetime" label="首次扫描时间" width="110">
         <template #default="scope">
           {{ datetimeFormat(scope.row.createDatetime) }}
         </template>
       </el-table-column>
-      <el-table-column prop="createDatetime" label="发布日期" width="110">
+      <el-table-column prop="createDatetime" label="发布时间" width="110">
         <template #default="scope">
           {{ datetimeFormat(scope.row.jobFirstPublishDatetime) }}
         </template>
@@ -259,8 +259,8 @@ const searchResultExport = async () => {
       招聘人: item.bossName,
       招聘公司: item.bossCompanyName,
       招聘者职位: item.bossPosition,
-      首次浏览日期: item.createDatetime,
-      记录更新日期: item.updateDatetime,
+      首次扫描时间: item.createDatetime,
+      记录更新时间: item.updateDatetime,
     });
   }
   const ws = utils.json_to_sheet(result);

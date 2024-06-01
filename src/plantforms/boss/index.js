@@ -123,7 +123,7 @@ function parseBossData(list, getListItem) {
           ? dayjs(jsonList[index].value?.zpData?.brandComInfo?.activeTime)
           : undefined;
         item["jobStatusDesc"] = jsonList?.[index]
-          ? jsonList[index].value?.zpData?.jobInfo?.jobStatusDesc
+          ? convertJobStatusDesc(jsonList[index].value?.zpData?.jobInfo?.jobStatusDesc)
           : undefined;
         item["postDescription"] = jsonList?.[index]
           ? jsonList[index].value?.zpData?.jobInfo?.postDescription
