@@ -33,7 +33,7 @@ function getListByNode(node) {
 // 监听 positionList-hook 节点，判断职位列表是否被挂载
 function mutationContainer() {
   return new Promise((resolve, reject) => {
-    const dom = document.querySelector(".positionlist");
+    const dom = document.querySelector(".positionlist__list");
     const observer = new MutationObserver(function (childList) {
       const isAdd = (childList || []).some((item) => {
         return item?.addedNodes?.length > 0;

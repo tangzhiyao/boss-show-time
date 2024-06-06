@@ -12,7 +12,7 @@ import { createOtherLink } from '../../utils';
 
 // 智联招聘首次打开页面时是服务端渲染，没法监听接口，但是 html 中保存了列表数据
 export default async function firstOpen(data) {
-  const dom = document.querySelector('.positionlist');
+  const dom = document.querySelector('.positionlist__list');
   setupSortJobItem(dom);
   const children = dom?.children;
   const { positionList = [] } = data;
