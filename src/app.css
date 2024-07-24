@@ -72,3 +72,9 @@
     font-size:12px;
     line-height: 18px;
 }
+
+.__job51_job_item {
+    position: relative;
+    padding-left: 20px;
+    padding-bottom: 10px;
+}
