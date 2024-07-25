@@ -160,6 +160,14 @@ function getTimeColorByOffsetTimeDay(offsetTimeDay) {
 export function setupSortJobItem(node) {
   if (!node) return;
   node.style = 'display:flex;flex-direction: column;';
+  //for 51job
+  const jobListItemList = node.querySelectorAll(".joblist-item");
+  if(jobListItemList && jobListItemList.length > 0){
+    for(let i=0;i<jobListItemList.length;i++){
+      let item = jobListItemList[i];
+      item.classList.add("__job51_job_item");
+    }
+  }
   //for zhilian
   const paginationNode = node.querySelector('.pagination');
   if (paginationNode) {
