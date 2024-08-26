@@ -63,7 +63,7 @@ import {initBridge} from "./api/common.js";
     window.addEventListener('proxyScriptLoaded', async function(e) {
         await initBridge();
         // 不通过直接注入脚本的方式处理 ssr 页面，否则一些引入的模块需要重新打包
-        if(location.host === 'sou.zhaopin.com') {
+        if(location.host === 'www.zhaopin.com') {
             // 智联招聘首次打开
             const data = e?.detail?.zhipin?.initialState
             zhilianFirstOpen(data || {});
